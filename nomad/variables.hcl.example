@@ -1,0 +1,33 @@
+# -----------------------------------
+# AWS VARIABLES
+# -----------------------------------
+
+# Packer variables (all are required)
+region                          = "AWS_REGION"
+
+# Terraform variables (all are required)
+ami                       = "OUTPUT_FROM_AWS_PACKER_BUILD"
+
+# Default values:
+# name_prefix                   = "nomad"
+# server_instance_type          = "t2.micro"
+# server_count                  = "3"
+# client_instance_type          = "t2.medium"
+# client_count                  = "3"
+# public_client_count           = "1"
+
+# -----------------------------------
+# AZURE VARIABLES
+# -----------------------------------
+
+# Packer variables
+location = "AZURE_REGION"
+
+# Terraform variables
+image_name = "OUTPUT_FROM_AZURE_PACKER_BUILD"
+resource_group_name = "EXISTING_RESOURCE_GROUP_NAME"
+
+# Default values:
+# name_prefix                   = "nomad"
+# azure_client_instance_type    = "Standard_B1s"
+# azure_client_count            = "1"

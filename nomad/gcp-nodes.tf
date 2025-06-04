@@ -29,15 +29,16 @@ resource "google_compute_instance" "client" {
   }
 
   metadata_startup_script = templatefile("${path.module}/../shared/data-scripts/user-data-client.sh", {
-    domain                  = var.domain,
+    domain                  = var.domain
     datacenter              = var.datacenter
-    nomad_node_name         = "gcp-client-${count.index}",
-    nomad_agent_meta        = "isPublic = false"
+    nomad_node_name         = "gcp-client-${count.index}"
+    nomad_agent_meta        = "isPublic = false, cloud = \"gcp\""
     region                  = var.gcp_region
     cloud_env               = "gce"
+    node_pool               = "gcp"
     retry_join              = local.gcp_retry_join
     nomad_binary            = var.nomad_binary
-    ca_certificate          = base64gzip("${tls_self_signed_cert.datacenter_ca.cert_pem}"),
+    ca_certificate          = base64gzip("${tls_self_signed_cert.datacenter_ca.cert_pem}")
     agent_certificate       = base64gzip("${tls_locally_signed_cert.gcp_client_cert[count.index].cert_pem}")
     agent_key               = base64gzip("${tls_private_key.gcp_client_key[count.index].private_key_pem}")
   })

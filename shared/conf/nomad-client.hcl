@@ -32,6 +32,7 @@ client {
   server_join {
     retry_join = [ "_CONSUL_RETRY_JOIN" ]
   }
+  node_pool = "_NODE_POOL"
 }
 
 # -----------------------------+

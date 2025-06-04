@@ -41,23 +41,6 @@ resource "azurerm_subnet_network_security_group_association" "hashistack-sg-asso
   network_security_group_id = azurerm_network_security_group.hashistack-sg.id
 }
 
-resource "azurerm_network_security_rule" "client_ports" {
-  name                        = "${var.name_prefix}-client-ports"
-  resource_group_name         = "${data.azurerm_resource_group.hashistack.name}"
-  network_security_group_name = "${azurerm_network_security_group.hashistack-sg.name}"
-
-  priority  = 105
-  direction = "Inbound"
-  access    = "Allow"
-  protocol  = "*"
-
-  #TODO: remove consul ports
-  source_address_prefix      = var.azure_allowlist_ip
-  source_port_range          = "*"
-  destination_port_ranges    = ["8300","8301","8302","8500","8501","8502","8503","8600"]
-  destination_address_prefix = "*"
-}
-
 resource "azurerm_network_security_rule" "client_ports_outbound" {
   name                        = "${var.name_prefix}-client-ports-outbound"
   resource_group_name         = "${data.azurerm_resource_group.hashistack.name}"

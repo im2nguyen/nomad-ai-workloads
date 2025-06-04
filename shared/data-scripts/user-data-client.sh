@@ -79,6 +79,7 @@ NOMAD_DATACENTER="${datacenter}"
 NOMAD_DOMAIN="${domain}"
 NOMAD_NODE_NAME="${nomad_node_name}"
 NOMAD_AGENT_META='${nomad_agent_meta}'
+NOMAD_CLIENT_NODE_POOL=${node_pool}
 
 
 # Install Nomad prerequisites
@@ -119,6 +120,7 @@ sudo sed -i "s/_CONSUL_RETRY_JOIN/$(cat $TEMP_RETRY_JOIN_FILE)/g" $NOMAD_CONFIG_
 # sudo sed -i "s/_CONSUL_AGENT_TOKEN/$NOMAD_AGENT_TOKEN/g" $NOMAD_CONFIG_DIR/nomad.hcl
 
 sudo sed -i "s/_PUBLIC_IP_ADDRESS/$PUBLIC_IP_ADDRESS/g" $NOMAD_CONFIG_DIR/nomad.hcl
+sudo sed -i "s/_NODE_POOL/$NOMAD_CLIENT_NODE_POOL/g" $NOMAD_CONFIG_DIR/nomad.hcl
 
 set +x 
 

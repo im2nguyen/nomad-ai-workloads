@@ -33,16 +33,16 @@ resource "aws_instance" "server" {
   }
 
   user_data = templatefile("${path.module}/../shared/data-scripts/user-data-server.sh", {
-    domain                  = var.domain,
-    datacenter              = var.datacenter,
-    server_count            = "${var.server_count}",
-    cloud_env               = "aws",
+    domain                  = var.domain
+    datacenter              = var.datacenter
+    server_count            = "${var.server_count}"
+    cloud_env               = "aws"
     retry_join              = local.retry_join_nomad,
-    nomad_node_name         = "aws-server-${count.index}",
-    nomad_encryption_key    = random_id.nomad_gossip_key.b64_std,
-    nomad_management_token = random_uuid.nomad_mgmt_token.result,
-    ca_certificate          = base64gzip("${tls_self_signed_cert.datacenter_ca.cert_pem}"),
-    agent_certificate       = base64gzip("${tls_locally_signed_cert.server_cert[count.index].cert_pem}"),
+    nomad_node_name         = "aws-server-${count.index}"
+    nomad_encryption_key    = random_id.nomad_gossip_key.b64_std
+    nomad_management_token  = random_uuid.nomad_mgmt_token.result
+    ca_certificate          = base64gzip("${tls_self_signed_cert.datacenter_ca.cert_pem}")
+    agent_certificate       = base64gzip("${tls_locally_signed_cert.server_cert[count.index].cert_pem}")
     agent_key               = base64gzip("${tls_private_key.server_key[count.index].private_key_pem}")
   })
 
@@ -110,14 +110,15 @@ resource "aws_instance" "client" {
   }
 
   user_data = templatefile("${path.module}/../shared/data-scripts/user-data-client.sh", {
-    domain                  = var.domain,
-    datacenter              = var.datacenter,
-    cloud_env               = "aws",
-    retry_join              = local.retry_join_nomad,
-    nomad_node_name         = "aws-client-${count.index}",
-    nomad_agent_meta        = "isPublic = false"
-    ca_certificate          = base64gzip("${tls_self_signed_cert.datacenter_ca.cert_pem}"),
-    agent_certificate       = base64gzip("${tls_locally_signed_cert.client_cert[count.index].cert_pem}"),
+    domain                  = var.domain
+    datacenter              = var.datacenter
+    cloud_env               = "aws"
+    node_pool               = "aws"
+    retry_join              = local.retry_join_nomad
+    nomad_node_name         = "aws-client-${count.index}"
+    nomad_agent_meta        = "isPublic = false, cloud = \"aws\""
+    ca_certificate          = base64gzip("${tls_self_signed_cert.datacenter_ca.cert_pem}")
+    agent_certificate       = base64gzip("${tls_locally_signed_cert.client_cert[count.index].cert_pem}")
     agent_key               = base64gzip("${tls_private_key.client_key[count.index].private_key_pem}")
   })
 
@@ -167,14 +168,15 @@ resource "aws_instance" "public_client" {
   }
 
   user_data = templatefile("${path.module}/../shared/data-scripts/user-data-client.sh", {
-    domain                  = var.domain,
-    datacenter              = var.datacenter,
-    cloud_env               = "aws",
+    domain                  = var.domain
+    datacenter              = var.datacenter
+    cloud_env               = "aws"
+    node_pool               = "aws"
     retry_join              = local.retry_join_nomad,
-    nomad_node_name         = "aws-public-client-${count.index}",
-    nomad_agent_meta        = "isPublic = true, nodeRole = \"ingress\""
-    ca_certificate          = base64gzip("${tls_self_signed_cert.datacenter_ca.cert_pem}"),
-    agent_certificate       = base64gzip("${tls_locally_signed_cert.client_cert[count.index].cert_pem}"),
+    nomad_node_name         = "aws-public-client-${count.index}"
+    nomad_agent_meta        = "isPublic = true, nodeRole = \"ingress\", cloud = \"aws\""
+    ca_certificate          = base64gzip("${tls_self_signed_cert.datacenter_ca.cert_pem}")
+    agent_certificate       = base64gzip("${tls_locally_signed_cert.client_cert[count.index].cert_pem}")
     agent_key               = base64gzip("${tls_private_key.client_key[count.index].private_key_pem}")
   })
 

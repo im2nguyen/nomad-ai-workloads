@@ -20,15 +20,16 @@ resource "azurerm_linux_virtual_machine" "client" {
   admin_username = "ubuntu"
   admin_password = random_string.vm_password.result
   custom_data    = "${base64encode(templatefile("${path.module}/../shared/data-scripts/user-data-client.sh", {
-      domain                  = var.domain,
+      domain                  = var.domain
       datacenter              = var.datacenter
-      nomad_node_name         = "azure-client-${count.index}",
-      nomad_agent_meta        = "isPublic = false"
-      region                    = var.location
-      cloud_env                 = "azure"
-      retry_join                = local.retry_join
-      nomad_binary              = var.nomad_binary
-      ca_certificate          = base64gzip("${tls_self_signed_cert.datacenter_ca.cert_pem}"),
+      nomad_node_name         = "azure-client-${count.index}"
+      nomad_agent_meta        = "isPublic = false, cloud = \"azure\""
+      region                  = var.location
+      cloud_env               = "azure"
+      node_pool               = "azure"
+      retry_join              = local.retry_join
+      nomad_binary            = var.nomad_binary
+      ca_certificate          = base64gzip("${tls_self_signed_cert.datacenter_ca.cert_pem}")
       agent_certificate       = base64gzip("${tls_locally_signed_cert.azure_client_cert[count.index].cert_pem}")
       agent_key               = base64gzip("${tls_private_key.azure_client_key[count.index].private_key_pem}")
   }))}"

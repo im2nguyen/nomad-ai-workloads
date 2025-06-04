@@ -49,7 +49,6 @@ resource "azurerm_network_security_rule" "client_ports" {
   priority  = 105
   direction = "Inbound"
   access    = "Allow"
-  # protocol  = "Tcp"
   protocol  = "*"
 
   #TODO: remove consul ports
@@ -67,7 +66,6 @@ resource "azurerm_network_security_rule" "client_ports_outbound" {
   priority  = 106
   direction = "Outbound"
   access    = "Allow"
-  # protocol  = "Tcp"
   protocol  = "*"
 
   source_address_prefix      = var.azure_allowlist_ip

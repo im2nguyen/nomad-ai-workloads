@@ -13,7 +13,7 @@ ami                       = "OUTPUT_FROM_AWS_PACKER_BUILD"
 # server_instance_type          = "t2.micro"
 # server_count                  = "3"
 # client_instance_type          = "t2.medium"
-# client_count                  = "3"
+# client_count                  = "1"
 # public_client_count           = "1"
 
 # -----------------------------------
@@ -31,3 +31,17 @@ resource_group_name = "EXISTING_RESOURCE_GROUP_NAME"
 # name_prefix                   = "nomad"
 # azure_client_instance_type    = "Standard_B1s"
 # azure_client_count            = "1"
+
+# -----------------------------------
+# GCP VARIABLES
+# -----------------------------------
+
+# Packer variables
+project                     = "GCP_PROJECT_ID"
+region                      = "GCP_REGION"
+zone                        = "GCP_ZONE"
+
+# Terraform variables
+machine_image               = "OUTPUT_FROM_GCP_PACKER_BUILD"
+# gcp_client_instance_type  = "e2-micro"
+# gcp_client_count          = "1"

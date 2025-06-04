@@ -25,6 +25,10 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "=3.0.0"
     }
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 6.37.0"
+    }
   }
 }
 
@@ -34,6 +38,12 @@ provider "aws" {
 
 provider "azurerm" {
   features {}
+}
+
+provider "google" {
+  project = var.gcp_project
+  region  = var.gcp_region
+  zone    = var.gcp_zone
 }
 
 provider "nomad" {

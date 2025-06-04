@@ -89,5 +89,5 @@ variable "public_client_count" {
 # Number of Nomad client instances to start
 variable "client_count" {
   description = "The number of clients to provision."
-  default     = "3"
+  default     = "1"
 }

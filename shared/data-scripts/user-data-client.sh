@@ -57,6 +57,7 @@ case $CLOUD in
   gce)
     echo "CLOUD_ENV: gce"
     IP_ADDRESS=$(curl -H "Metadata-Flavor: Google" http://metadata/computeMetadata/v1/instance/network-interfaces/0/ip)
+    PUBLIC_IP_ADDRESS=$(curl -H "Metadata-Flavor: Google" http://metadata/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip)
     ;;
   azure)
     echo "CLOUD_ENV: azure"

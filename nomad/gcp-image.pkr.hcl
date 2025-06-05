@@ -19,8 +19,13 @@ variable "gcp_zone" {
   type = string
 }
 
+variable "image_name" {
+  type = string
+  default = "nomad-multicloud"
+}
+
 source "googlecompute" "nomad-multicloud" {
-  image_name   = "nomad-multicloud-${local.timestamp}"
+  image_name   = "${var.image_name}-${local.timestamp}"
   project_id   = var.gcp_project
   source_image = "ubuntu-minimal-2204-jammy-v20231213b"
   ssh_username = "packer"

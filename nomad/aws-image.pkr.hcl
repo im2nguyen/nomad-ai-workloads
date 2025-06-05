@@ -11,7 +11,7 @@ locals {
   timestamp = regex_replace(timestamp(), "[- TZ:]", "")
 }
 
-variable "region" {
+variable "aws_region" {
   type = string
 }
 
@@ -25,14 +25,14 @@ data "amazon-ami" "nomad-multicloud" {
   }
   most_recent = true
   owners      = ["099720109477"]
-  region      = var.region
+  region      = var.aws_region
 }
 
 
 source "amazon-ebs" "nomad-multicloud" {
   ami_name      = "nomad-multicloud-${local.timestamp}"
   instance_type = "t2.medium"
-  region        = var.region
+  region        = var.aws_region
   source_ami    = "${data.amazon-ami.nomad-multicloud.id}"
   ssh_username  = "ubuntu"
   force_deregister = true

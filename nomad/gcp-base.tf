@@ -1,9 +1,9 @@
 resource "google_compute_network" "nomad-multicloud" {
-  name = "nomad-multicloud-${var.name_prefix}"
+  name = "${local.prefix}-network"
 }
 
 resource "google_compute_firewall" "ssh_ingress" {
-  name          = "${var.name_prefix}-ssh-ingress"
+  name          = "${local.prefix}-ssh-ingress"
   network       = google_compute_network.nomad-multicloud.name
   source_ranges = [var.allowlist_ip]
 
@@ -15,7 +15,7 @@ resource "google_compute_firewall" "ssh_ingress" {
 }
 
 resource "google_compute_firewall" "allow_all_internal" {
-  name        = "${var.name_prefix}-allow-all-internal"
+  name        = "${local.prefix}-allow-all-internal"
   network     = google_compute_network.nomad-multicloud.name
   source_tags = ["auto-join"]
 
@@ -35,7 +35,7 @@ resource "google_compute_firewall" "allow_all_internal" {
 }
 
 resource "google_compute_firewall" "clients_ingress" {
-  name          = "${var.name_prefix}-clients-ingress"
+  name          = "${local.prefix}-clients-ingress"
   network       = google_compute_network.nomad-multicloud.name
   source_ranges = [var.allowlist_ip]
   target_tags   = ["nomad-clients"]

@@ -15,7 +15,7 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.13.0"
 
-  name = local.name
+  name = local.prefix
 
   cidr = "10.0.0.0/16"
   azs  = slice(data.aws_availability_zones.available.names, 0, 3)
@@ -34,7 +34,7 @@ module "vpc" {
 #-------------------------------------------------------------------------------
 
 resource "aws_security_group" "nomad_ui_ingress" {
-  name   = "${local.name}-ui-ingress"
+  name   = "${local.prefix}-ui-ingress"
   vpc_id = module.vpc.vpc_id
 
   # Nomad UI
@@ -54,7 +54,7 @@ resource "aws_security_group" "nomad_ui_ingress" {
 }
 
 resource "aws_security_group" "ssh_ingress" {
-  name   = "${local.name}-ssh-ingress"
+  name   = "${local.prefix}-ssh-ingress"
   vpc_id = module.vpc.vpc_id
 
   # SSH
@@ -74,7 +74,7 @@ resource "aws_security_group" "ssh_ingress" {
 }
 
 resource "aws_security_group" "allow_all_internal" {
-  name   = "${local.name}-allow-all-internal"
+  name   = "${local.prefix}-allow-all-internal"
   vpc_id = module.vpc.vpc_id
 
   ingress {
@@ -93,7 +93,7 @@ resource "aws_security_group" "allow_all_internal" {
 }
 
 resource "aws_security_group" "clients_ingress" {
-  name   = "${local.name}-clients-ingress"
+  name   = "${local.prefix}-clients-ingress"
   vpc_id = module.vpc.vpc_id
 
   egress {
@@ -133,7 +133,7 @@ resource "aws_security_group" "clients_ingress" {
 
 # External ingress from client nodes running in azure
 resource "aws_security_group" "azure_clients_ingress" {
-  name   = "${local.name}-azure-clients-ingress"
+  name   = "${local.prefix}-azure-clients-ingress"
   vpc_id = module.vpc.vpc_id
 
   # Nomad TCP ports
@@ -165,12 +165,12 @@ resource "aws_security_group" "azure_clients_ingress" {
 #-------------------------------------------------------------------------------
 
 resource "aws_iam_instance_profile" "instance_profile" {
-  name_prefix = local.name
+  name_prefix = local.prefix
   role        = aws_iam_role.instance_role.name
 }
 
 resource "aws_iam_role" "instance_role" {
-  name_prefix = local.name
+  name_prefix = local.prefix
   assume_role_policy = data.aws_iam_policy_document.instance_role.json
 }
 
@@ -187,7 +187,7 @@ data "aws_iam_policy_document" "instance_role" {
 }
 
 resource "aws_iam_role_policy" "auto_discover_cluster" {
-  name   = "${local.name}-auto-discover-cluster"
+  name   = "${local.prefix}-auto-discover-cluster"
   role   = aws_iam_role.instance_role.id
   policy = data.aws_iam_policy_document.auto_discover_cluster.json
 }

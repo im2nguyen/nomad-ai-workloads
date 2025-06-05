@@ -5,10 +5,10 @@
 resource "aws_instance" "server" {
 
   depends_on             = [module.vpc]
-  count                  = var.server_count
+  count                  = var.aws_server_count
 
-  ami                    = var.ami
-  instance_type          = var.server_instance_type
+  ami                    = var.aws_ami
+  instance_type          = var.aws_server_instance_type
   key_name               = aws_key_pair.vm_ssh_key-pair.key_name
   associate_public_ip_address = true
   vpc_security_group_ids = [
@@ -21,21 +21,21 @@ resource "aws_instance" "server" {
 
   # NomadJoinTag is necessary for nodes to automatically join the cluster
   tags = {
-    Name = "${local.name}-server-${count.index}",
+    Name = "${local.prefix}-server-${count.index}",
     NomadJoinTag = "auto-join-${random_string.suffix.result}",
     NomadType = "server"
   }
 
   root_block_device {
     volume_type           = "gp2"
-    volume_size           = var.root_block_device_size
+    volume_size           = var.aws_root_block_device_size
     delete_on_termination = "true"
   }
 
   user_data = templatefile("${path.module}/../shared/data-scripts/user-data-server.sh", {
     domain                  = var.domain
     datacenter              = var.datacenter
-    server_count            = "${var.server_count}"
+    server_count            = "${var.aws_server_count}"
     cloud_env               = "aws"
     retry_join              = local.retry_join_nomad,
     nomad_node_name         = "aws-server-${count.index}"
@@ -76,10 +76,10 @@ resource "aws_instance" "server" {
 resource "aws_instance" "client" {
   
   depends_on             = [aws_instance.server]
-  count                  = var.client_count
+  count                  = var.aws_client_count
   
-  ami                    = var.ami
-  instance_type          = var.client_instance_type
+  ami                    = var.aws_ami
+  instance_type          = var.aws_client_instance_type
   key_name               = aws_key_pair.vm_ssh_key-pair.key_name
   associate_public_ip_address = true
   vpc_security_group_ids = [
@@ -91,14 +91,14 @@ resource "aws_instance" "client" {
 
   # NomadJoinTag is necessary for nodes to automatically join the cluster
   tags = {
-    Name = "${local.name}-client-${count.index}",
+    Name = "${local.prefix}-client-${count.index}",
     NomadJoinTag = "auto-join-${random_string.suffix.result}",
     NomadType = "client"
   } 
 
   root_block_device {
     volume_type           = "gp2"
-    volume_size           = var.root_block_device_size
+    volume_size           = var.aws_root_block_device_size
     delete_on_termination = "true"
   }
 
@@ -133,10 +133,10 @@ resource "aws_instance" "client" {
 resource "aws_instance" "public_client" {
   
   depends_on             = [aws_instance.server]
-  count                  = var.public_client_count
+  count                  = var.aws_public_client_count
   
-  ami                    = var.ami
-  instance_type          = var.client_instance_type
+  ami                    = var.aws_ami
+  instance_type          = var.aws_client_instance_type
   key_name               = aws_key_pair.vm_ssh_key-pair.key_name
   associate_public_ip_address = true
   vpc_security_group_ids = [
@@ -149,14 +149,14 @@ resource "aws_instance" "public_client" {
 
   # NomadJoinTag is necessary for nodes to automatically join the cluster
   tags = {
-    Name = "${local.name}-ingress-client-${count.index}",
+    Name = "${local.prefix}-ingress-client-${count.index}",
     NomadJoinTag = "auto-join-${random_string.suffix.result}",
     NomadType = "client"
   } 
 
   root_block_device {
     volume_type           = "gp2"
-    volume_size           = var.root_block_device_size
+    volume_size           = var.aws_root_block_device_size
     delete_on_termination = "true"
   }
 

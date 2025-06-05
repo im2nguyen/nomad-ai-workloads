@@ -16,11 +16,7 @@ provider "azurerm" {
   features {}
 }
 
-locals {
-  name = "nomad-multicloud"
-  location = "eastus"
-}
 resource "azurerm_resource_group" "nomad-multicloud" {
-  name     = local.name
-  location = local.location
+  name     = var.name_prefix
+  location = var.azure_location
 }

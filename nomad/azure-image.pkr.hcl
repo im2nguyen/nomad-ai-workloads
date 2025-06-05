@@ -11,19 +11,19 @@ locals {
   timestamp = regex_replace(timestamp(), "[- TZ:]", "")
 }
 
-variable "location" {
+variable "azure_location" {
   type = string
 }
 
-variable "resource_group_name" {
+variable "azure_resource_group_name" {
   type = string
   default = "nomad-multicloud"
 }
 
 source "azure-arm" "nomad-multicloud" {
   use_azure_cli_auth = true
-  managed_image_resource_group_name = var.resource_group_name
-  managed_image_name = "nomad-multicloud.${local.timestamp}"
+  managed_image_resource_group_name = var.azure_resource_group_name
+  managed_image_name = "${var.azure_resource_group_name}.${local.timestamp}"
   os_type = "Linux"
   image_publisher = "Canonical"
   image_offer = "0001-com-ubuntu-server-jammy"
@@ -33,7 +33,7 @@ source "azure-arm" "nomad-multicloud" {
     dept = "education"
   }
 
-  location = var.location
+  location = var.azure_location
   vm_size = "Standard_B2s"
 }
 

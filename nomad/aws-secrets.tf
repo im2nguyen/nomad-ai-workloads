@@ -8,7 +8,7 @@ resource "tls_private_key" "vm_ssh_key" {
 }
 
 resource "aws_key_pair" "vm_ssh_key-pair" {
-  key_name   = "${local.name}-aws-key-pair"
+  key_name   = "${local.prefix}-aws-key-pair"
   public_key = tls_private_key.vm_ssh_key.public_key_openssh
 }
 
@@ -68,14 +68,14 @@ resource "local_file" "ca_cert" {
 
 # Server Keys
 resource "tls_private_key" "server_key" {
-  count       = "${var.server_count}"
+  count       = "${var.aws_server_count}"
   algorithm   = "ECDSA"
   ecdsa_curve = "P384"
 }
 
 # Server CSR
 resource "tls_cert_request" "server_csr" {
-  count = "${var.server_count}"
+  count = "${var.aws_server_count}"
   private_key_pem = "${element(tls_private_key.server_key.*.private_key_pem, count.index)}"
 
   subject {
@@ -104,7 +104,7 @@ resource "tls_cert_request" "server_csr" {
 
 # Server Certs
 resource "tls_locally_signed_cert" "server_cert" {
-  count = "${var.server_count}"
+  count = "${var.aws_server_count}"
   cert_request_pem = "${element(tls_cert_request.server_csr.*.cert_request_pem, count.index)}"
 
   ca_private_key_pem = "${tls_private_key.datacenter_ca.private_key_pem}"
@@ -122,14 +122,14 @@ resource "tls_locally_signed_cert" "server_cert" {
 
 # Client Keys
 resource "tls_private_key" "client_key" {
-  count       = "${var.client_count}"
+  count       = "${var.aws_client_count}"
   algorithm   = "ECDSA"
   ecdsa_curve = "P384"
 }
 
 # Client CSR
 resource "tls_cert_request" "client_csr" {
-  count = "${var.client_count}"
+  count = "${var.aws_client_count}"
   private_key_pem = "${element(tls_private_key.client_key.*.private_key_pem, count.index)}"
 
   subject {
@@ -156,7 +156,7 @@ resource "tls_cert_request" "client_csr" {
 
 # Client Certs
 resource "tls_locally_signed_cert" "client_cert" {
-  count = "${var.client_count}"
+  count = "${var.aws_client_count}"
   cert_request_pem = "${element(tls_cert_request.client_csr.*.cert_request_pem, count.index)}"
 
   ca_private_key_pem = "${tls_private_key.datacenter_ca.private_key_pem}"
@@ -174,14 +174,14 @@ resource "tls_locally_signed_cert" "client_cert" {
 
 # Public Client Keys
 resource "tls_private_key" "public_client_key" {
-  count       = "${var.public_client_count}"
+  count       = "${var.aws_public_client_count}"
   algorithm   = "ECDSA"
   ecdsa_curve = "P384"
 }
 
 # Public Client CSR
 resource "tls_cert_request" "public_client_csr" {
-  count = "${var.public_client_count}"
+  count = "${var.aws_public_client_count}"
   private_key_pem = "${element(tls_private_key.public_client_key.*.private_key_pem, count.index)}"
 
   subject {
@@ -208,7 +208,7 @@ resource "tls_cert_request" "public_client_csr" {
 
 # Public Client Certs
 resource "tls_locally_signed_cert" "public_client_cert" {
-  count = "${var.public_client_count}"
+  count = "${var.aws_public_client_count}"
   cert_request_pem = "${element(tls_cert_request.public_client_csr.*.cert_request_pem, count.index)}"
 
   ca_private_key_pem = "${tls_private_key.datacenter_ca.private_key_pem}"

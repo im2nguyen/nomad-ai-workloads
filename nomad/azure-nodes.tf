@@ -1,6 +1,6 @@
 resource "azurerm_linux_virtual_machine" "client" {
-  name                  = "nomad-multicloud-client-${count.index}"
-  location              = "${var.location}"
+  name                  = "${local.prefix}-client-${count.index}"
+  location              = "${var.azure_location}"
   resource_group_name   = "${data.azurerm_resource_group.nomad-multicloud.name}"
   network_interface_ids = ["${element(azurerm_network_interface.nomad-multicloud-client-ni.*.id, count.index)}"]
   size                  = "${var.azure_client_instance_type}"
@@ -8,15 +8,15 @@ resource "azurerm_linux_virtual_machine" "client" {
   # Depends on AWS server(s)
   depends_on             = [aws_instance.server]
 
-  source_image_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.resource_group_name}/providers/Microsoft.Compute/images/${var.image_name}"
+  source_image_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.azure_resource_group_name}/providers/Microsoft.Compute/images/${var.azure_image_name}"
 
   os_disk {
-    name              = "nomad-multicloud-client-osdisk-${count.index}"
+    name              = "${local.prefix}-client-osdisk-${count.index}"
     caching           = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }
 
-  computer_name  = "nomad-multicloud-client-${count.index}"
+  computer_name  = "${local.prefix}-client-${count.index}"
   admin_username = "ubuntu"
   admin_password = random_string.vm_password.result
   custom_data    = "${base64encode(templatefile("${path.module}/../shared/data-scripts/user-data-client.sh", {
@@ -24,11 +24,10 @@ resource "azurerm_linux_virtual_machine" "client" {
       datacenter              = var.datacenter
       nomad_node_name         = "azure-client-${count.index}"
       nomad_agent_meta        = "isPublic = false, cloud = \"azure\""
-      region                  = var.location
+      region                  = var.azure_location
       cloud_env               = "azure"
       node_pool               = "azure"
       retry_join              = local.retry_join
-      nomad_binary            = var.nomad_binary
       ca_certificate          = base64gzip("${tls_self_signed_cert.datacenter_ca.cert_pem}")
       agent_certificate       = base64gzip("${tls_locally_signed_cert.azure_client_cert[count.index].cert_pem}")
       agent_key               = base64gzip("${tls_private_key.azure_client_key[count.index].private_key_pem}")

@@ -13,26 +13,26 @@ resource "random_string" "vm_password" {
 }
 
 data "azurerm_resource_group" "nomad-multicloud" {
-  name = "nomad-multicloud"
+  name = "${var.name_prefix}"
 }
 
 resource "azurerm_virtual_network" "nomad-multicloud-vn" {
-  name                = "nomad-multicloud-vn"
+  name                = "${local.prefix}-vn"
   address_space       = ["10.0.0.0/16"]
-  location            = "${var.location}"
+  location            = "${var.azure_location}"
   resource_group_name = "${data.azurerm_resource_group.nomad-multicloud.name}"
 }
 
 resource "azurerm_subnet" "nomad-multicloud-sn" {
-  name                 = "nomad-multicloud-sn"
+  name                 = "${local.prefix}-sn"
   resource_group_name  = "${data.azurerm_resource_group.nomad-multicloud.name}"
   virtual_network_name = "${azurerm_virtual_network.nomad-multicloud-vn.name}"
   address_prefixes       = ["10.0.2.0/24"]
 }
 
 resource "azurerm_network_security_group" "nomad-multicloud-sg" {
-  name                = "nomad-multicloud-sg"
-  location            = "${var.location}"
+  name                = "${local.prefix}-sg"
+  location            = "${var.azure_location}"
   resource_group_name = "${data.azurerm_resource_group.nomad-multicloud.name}"
 }
 
@@ -42,7 +42,7 @@ resource "azurerm_subnet_network_security_group_association" "nomad-multicloud-s
 }
 
 resource "azurerm_network_security_rule" "client_ports_outbound" {
-  name                        = "${var.name_prefix}-client-ports-outbound"
+  name                        = "${local.prefix}-client-ports-outbound"
   resource_group_name         = "${data.azurerm_resource_group.nomad-multicloud.name}"
   network_security_group_name = "${azurerm_network_security_group.nomad-multicloud-sg.name}"
 
@@ -58,7 +58,7 @@ resource "azurerm_network_security_rule" "client_ports_outbound" {
 }
 
 resource "azurerm_network_security_rule" "ssh_ingress" {
-  name                        = "${var.name_prefix}-ssh-ingress"
+  name                        = "${local.prefix}-ssh-ingress"
   resource_group_name         = "${data.azurerm_resource_group.nomad-multicloud.name}"
   network_security_group_name = "${azurerm_network_security_group.nomad-multicloud-sg.name}"
 
@@ -74,7 +74,7 @@ resource "azurerm_network_security_rule" "ssh_ingress" {
 }
 
 resource "azurerm_network_security_rule" "clients_ingress" {
-  name                        = "${var.name_prefix}-clients-ingress"
+  name                        = "${local.prefix}-clients-ingress"
   resource_group_name         = "${data.azurerm_resource_group.nomad-multicloud.name}"
   network_security_group_name = "${azurerm_network_security_group.nomad-multicloud-sg.name}"
 
@@ -95,20 +95,20 @@ resource "azurerm_network_security_rule" "clients_ingress" {
 
 resource "azurerm_public_ip" "nomad-multicloud-client-public-ip" {
   count                        = "${var.azure_client_count}"
-  name                         = "nomad-multicloud-client-ip-${count.index}"
-  location                     = "${var.location}"
+  name                         = "${local.prefix}-client-ip-${count.index}"
+  location                     = "${var.azure_location}"
   resource_group_name          = "${data.azurerm_resource_group.nomad-multicloud.name}"
   allocation_method             = "Static"
 }
 
 resource "azurerm_network_interface" "nomad-multicloud-client-ni" {
   count                     = "${var.azure_client_count}"
-  name                      = "nomad-multicloud-client-ni-${count.index}"
-  location                  = "${var.location}"
+  name                      = "${local.prefix}-client-ni-${count.index}"
+  location                  = "${var.azure_location}"
   resource_group_name       = "${data.azurerm_resource_group.nomad-multicloud.name}"
 
   ip_configuration {
-    name                          = "nomad-multicloud-ipc"
+    name                          = "${local.prefix}-ipc"
     subnet_id                     = "${azurerm_subnet.nomad-multicloud-sn.id}"
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = "${element(azurerm_public_ip.nomad-multicloud-client-public-ip.*.id, count.index)}"

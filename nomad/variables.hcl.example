@@ -3,32 +3,32 @@
 # -----------------------------------
 
 # Packer variables (all are required)
-region                          = "AWS_REGION"
+aws_region                      = "AWS_REGION"
 
 # Terraform variables (all are required)
-ami                       = "OUTPUT_FROM_AWS_PACKER_BUILD"
+aws_ami                         = "OUTPUT_FROM_AWS_PACKER_BUILD"
 
 # Default values:
-# name_prefix                   = "nomad"
-# server_instance_type          = "t2.micro"
-# server_count                  = "3"
-# client_instance_type          = "t2.medium"
-# client_count                  = "1"
-# public_client_count           = "1"
+# aws_server_instance_type      = "t2.micro"
+# aws_server_count              = "3"
+# aws_client_instance_type      = "t2.medium"
+# aws_client_count              = "1"
+# aws_public_client_count       = "1"
 
 # -----------------------------------
 # AZURE VARIABLES
 # -----------------------------------
 
 # Packer variables
-location = "AZURE_REGION"
+azure_location                  = "AZURE_REGION"
 
 # Terraform variables
-image_name = "OUTPUT_FROM_AZURE_PACKER_BUILD"
-resource_group_name = "EXISTING_RESOURCE_GROUP_NAME"
+azure_image_name                = "OUTPUT_FROM_AZURE_PACKER_BUILD"
+# azure_resource_group_name must match the value for name_prefix
+# in variables.tf
+azure_resource_group_name       = "nomad-multicloud"
 
 # Default values:
-# name_prefix                   = "nomad"
 # azure_client_instance_type    = "Standard_B1s"
 # azure_client_count            = "1"
 
@@ -37,11 +37,11 @@ resource_group_name = "EXISTING_RESOURCE_GROUP_NAME"
 # -----------------------------------
 
 # Packer variables
-project                     = "GCP_PROJECT_ID"
-region                      = "GCP_REGION"
-zone                        = "GCP_ZONE"
+gcp_project                     = "GCP_PROJECT_ID"
+gcp_region                      = "GCP_REGION"
+gcp_zone                        = "GCP_ZONE"
 
 # Terraform variables
-machine_image               = "OUTPUT_FROM_GCP_PACKER_BUILD"
-# gcp_client_instance_type  = "e2-micro"
-# gcp_client_count          = "1"
+gcp_machine_image               = "OUTPUT_FROM_GCP_PACKER_BUILD"
+# gcp_client_instance_type      = "e2-micro"
+# gcp_client_count              = "1"

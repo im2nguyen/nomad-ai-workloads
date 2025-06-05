@@ -87,10 +87,10 @@ resource "azurerm_network_security_rule" "clients_ingress" {
   # These rules are applied only to the client nodes
 
   # nginx example; replace with your application port
-  source_address_prefix      = var.azure_allowlist_ip
+  source_address_prefix      = "*"
   source_port_range          = "*"
   destination_port_range     = "80"
-  destination_address_prefixes = azurerm_linux_virtual_machine.client[*].public_ip_address
+  destination_address_prefix = "*"
 }
 
 resource "azurerm_public_ip" "nomad-multicloud-client-public-ip" {

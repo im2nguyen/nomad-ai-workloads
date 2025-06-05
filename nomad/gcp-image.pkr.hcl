@@ -19,8 +19,8 @@ variable "gcp_zone" {
   type = string
 }
 
-source "googlecompute" "hashistack" {
-  image_name   = "hashistack-${local.timestamp}"
+source "googlecompute" "nomad-multicloud" {
+  image_name   = "nomad-multicloud-${local.timestamp}"
   project_id   = var.gcp_project
   source_image = "ubuntu-minimal-2204-jammy-v20231213b"
   ssh_username = "packer"
@@ -28,7 +28,7 @@ source "googlecompute" "hashistack" {
 }
 
 build {
-  sources = ["sources.googlecompute.hashistack"]
+  sources = ["sources.googlecompute.nomad-multicloud"]
 
   provisioner "shell" {
     inline = ["sudo mkdir -p /ops/shared", "sudo chmod 777 -R /ops"]

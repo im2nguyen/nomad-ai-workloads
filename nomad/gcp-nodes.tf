@@ -14,7 +14,7 @@ resource "google_compute_instance" "client" {
   }
 
   network_interface {
-    network = google_compute_network.hashistack.name
+    network = google_compute_network.nomad-multicloud.name
     access_config {
       // Leave empty to get an ephemeral public IP
     }

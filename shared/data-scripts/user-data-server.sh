@@ -15,11 +15,7 @@ exec > >(sudo tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 
 echo "Setup configuration PATHS"
 
 CONFIG_DIR=/ops/shared/conf
-
-CONSUL_CONFIG_DIR=/etc/consul.d
-VAULT_CONFIG_DIR=/etc/vault.d
 NOMAD_CONFIG_DIR=/etc/nomad.d
-CONSULTEMPLATE_CONFIG_DIR=/etc/consul-template.d
 
 HOME_DIR=ubuntu
 
@@ -32,10 +28,6 @@ echo "${ca_certificate}"    | base64 -d | zcat > /tmp/agent-ca.pem
 echo "${agent_certificate}" | base64 -d | zcat > /tmp/agent.pem
 echo "${agent_key}"         | base64 -d | zcat > /tmp/agent-key.pem
 
-sudo cp /tmp/agent-ca.pem $CONSUL_CONFIG_DIR/consul-agent-ca.pem
-sudo cp /tmp/agent.pem $CONSUL_CONFIG_DIR/consul-agent.pem
-sudo cp /tmp/agent-key.pem $CONSUL_CONFIG_DIR/consul-agent-key.pem
-
 sudo cp /tmp/agent-ca.pem $NOMAD_CONFIG_DIR/nomad-agent-ca.pem
 sudo cp /tmp/agent.pem $NOMAD_CONFIG_DIR/nomad-agent.pem
 sudo cp /tmp/agent-key.pem $NOMAD_CONFIG_DIR/nomad-agent-key.pem
@@ -46,7 +38,6 @@ sudo cp /tmp/agent-key.pem $NOMAD_CONFIG_DIR/nomad-agent-key.pem
 echo "Retrieve IP addresses"
 
 # Wait for network
-## todo test if this value is not too big
 sleep 15
 
 DOCKER_BRIDGE_IP_ADDRESS=`ip -brief addr show docker0 | awk '{print $3}' | awk -F/ '{print $1}'`
@@ -65,6 +56,7 @@ case $CLOUD in
   gce)
     echo "CLOUD_ENV: gce"
     IP_ADDRESS=$(curl -H "Metadata-Flavor: Google" http://metadata/computeMetadata/v1/instance/network-interfaces/0/ip)
+    PUBLIC_IP_ADDRESS=$(curl -H "Metadata-Flavor: Google" http://metadata/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip)
     ;;
   azure)
     echo "CLOUD_ENV: azure"
@@ -81,7 +73,7 @@ esac
 
 echo "Setup Environment variables"
 
-CONSUL_RETRY_JOIN="${retry_join}"
+NOMAD_RETRY_JOIN="${retry_join}"
 
 # nomad.hcl variables needed
 NOMAD_DATACENTER="${datacenter}"
@@ -106,10 +98,7 @@ sudo sed -i "s/_NOMAD_DOMAIN/$NOMAD_DOMAIN/g" $NOMAD_CONFIG_DIR/nomad.hcl
 sudo sed -i "s/_NOMAD_NODE_NAME/$NOMAD_NODE_NAME/g" $NOMAD_CONFIG_DIR/nomad.hcl
 sudo sed -i "s/_NOMAD_SERVER_COUNT/$NOMAD_SERVER_COUNT/g" $NOMAD_CONFIG_DIR/nomad.hcl
 sudo sed -i "s#_NOMAD_ENCRYPTION_KEY#$NOMAD_ENCRYPTION_KEY#g" $NOMAD_CONFIG_DIR/nomad.hcl
-# sudo sed -i "s/_CONSUL_IP_ADDRESS/$CONSUL_PUBLIC_BIND_ADDR/g" $NOMAD_CONFIG_DIR/nomad.hcl
-sudo sed -i "s/_CONSUL_AGENT_TOKEN/$CONSUL_AGENT_TOKEN/g" $NOMAD_CONFIG_DIR/nomad.hcl
-sudo sed -i "s/_CONSUL_RETRY_JOIN/$CONSUL_RETRY_JOIN/g" $NOMAD_CONFIG_DIR/nomad.hcl
-
+sudo sed -i "s/_NOMAD_RETRY_JOIN/$NOMAD_RETRY_JOIN/g" $NOMAD_CONFIG_DIR/nomad.hcl
 sudo sed -i "s/_PUBLIC_IP_ADDRESS/$PUBLIC_IP_ADDRESS/g" $NOMAD_CONFIG_DIR/nomad.hcl
 
 echo "Start Nomad"

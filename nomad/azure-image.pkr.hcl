@@ -17,13 +17,13 @@ variable "location" {
 
 variable "resource_group_name" {
   type = string
-  default = "hashistack"
+  default = "nomad-multicloud"
 }
 
-source "azure-arm" "hashistack" {
+source "azure-arm" "nomad-multicloud" {
   use_azure_cli_auth = true
   managed_image_resource_group_name = var.resource_group_name
-  managed_image_name = "hashistack.${local.timestamp}"
+  managed_image_name = "nomad-multicloud.${local.timestamp}"
   os_type = "Linux"
   image_publisher = "Canonical"
   image_offer = "0001-com-ubuntu-server-jammy"
@@ -38,7 +38,7 @@ source "azure-arm" "hashistack" {
 }
 
 build {
-  sources = ["source.azure-arm.hashistack"]
+  sources = ["source.azure-arm.nomad-multicloud"]
 
   provisioner "shell" {
     inline = ["sudo mkdir -p /ops/shared", "sudo chmod 777 -R /ops"]

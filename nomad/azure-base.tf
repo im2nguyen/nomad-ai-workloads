@@ -12,39 +12,39 @@ resource "random_string" "vm_password" {
   special          = false
 }
 
-data "azurerm_resource_group" "hashistack" {
-  name = "hashistack"
+data "azurerm_resource_group" "nomad-multicloud" {
+  name = "nomad-multicloud"
 }
 
-resource "azurerm_virtual_network" "hashistack-vn" {
-  name                = "hashistack-vn"
+resource "azurerm_virtual_network" "nomad-multicloud-vn" {
+  name                = "nomad-multicloud-vn"
   address_space       = ["10.0.0.0/16"]
   location            = "${var.location}"
-  resource_group_name = "${data.azurerm_resource_group.hashistack.name}"
+  resource_group_name = "${data.azurerm_resource_group.nomad-multicloud.name}"
 }
 
-resource "azurerm_subnet" "hashistack-sn" {
-  name                 = "hashistack-sn"
-  resource_group_name  = "${data.azurerm_resource_group.hashistack.name}"
-  virtual_network_name = "${azurerm_virtual_network.hashistack-vn.name}"
+resource "azurerm_subnet" "nomad-multicloud-sn" {
+  name                 = "nomad-multicloud-sn"
+  resource_group_name  = "${data.azurerm_resource_group.nomad-multicloud.name}"
+  virtual_network_name = "${azurerm_virtual_network.nomad-multicloud-vn.name}"
   address_prefixes       = ["10.0.2.0/24"]
 }
 
-resource "azurerm_network_security_group" "hashistack-sg" {
-  name                = "hashistack-sg"
+resource "azurerm_network_security_group" "nomad-multicloud-sg" {
+  name                = "nomad-multicloud-sg"
   location            = "${var.location}"
-  resource_group_name = "${data.azurerm_resource_group.hashistack.name}"
+  resource_group_name = "${data.azurerm_resource_group.nomad-multicloud.name}"
 }
 
-resource "azurerm_subnet_network_security_group_association" "hashistack-sg-association" {
-  subnet_id                 = azurerm_subnet.hashistack-sn.id
-  network_security_group_id = azurerm_network_security_group.hashistack-sg.id
+resource "azurerm_subnet_network_security_group_association" "nomad-multicloud-sg-association" {
+  subnet_id                 = azurerm_subnet.nomad-multicloud-sn.id
+  network_security_group_id = azurerm_network_security_group.nomad-multicloud-sg.id
 }
 
 resource "azurerm_network_security_rule" "client_ports_outbound" {
   name                        = "${var.name_prefix}-client-ports-outbound"
-  resource_group_name         = "${data.azurerm_resource_group.hashistack.name}"
-  network_security_group_name = "${azurerm_network_security_group.hashistack-sg.name}"
+  resource_group_name         = "${data.azurerm_resource_group.nomad-multicloud.name}"
+  network_security_group_name = "${azurerm_network_security_group.nomad-multicloud-sg.name}"
 
   priority  = 106
   direction = "Outbound"
@@ -59,8 +59,8 @@ resource "azurerm_network_security_rule" "client_ports_outbound" {
 
 resource "azurerm_network_security_rule" "ssh_ingress" {
   name                        = "${var.name_prefix}-ssh-ingress"
-  resource_group_name         = "${data.azurerm_resource_group.hashistack.name}"
-  network_security_group_name = "${azurerm_network_security_group.hashistack-sg.name}"
+  resource_group_name         = "${data.azurerm_resource_group.nomad-multicloud.name}"
+  network_security_group_name = "${azurerm_network_security_group.nomad-multicloud-sg.name}"
 
   priority  = 100
   direction = "Inbound"
@@ -75,8 +75,8 @@ resource "azurerm_network_security_rule" "ssh_ingress" {
 
 resource "azurerm_network_security_rule" "clients_ingress" {
   name                        = "${var.name_prefix}-clients-ingress"
-  resource_group_name         = "${data.azurerm_resource_group.hashistack.name}"
-  network_security_group_name = "${azurerm_network_security_group.hashistack-sg.name}"
+  resource_group_name         = "${data.azurerm_resource_group.nomad-multicloud.name}"
+  network_security_group_name = "${azurerm_network_security_group.nomad-multicloud-sg.name}"
 
   priority  = 110
   direction = "Inbound"
@@ -93,24 +93,24 @@ resource "azurerm_network_security_rule" "clients_ingress" {
   destination_address_prefixes = azurerm_linux_virtual_machine.client[*].public_ip_address
 }
 
-resource "azurerm_public_ip" "hashistack-client-public-ip" {
+resource "azurerm_public_ip" "nomad-multicloud-client-public-ip" {
   count                        = "${var.azure_client_count}"
-  name                         = "hashistack-client-ip-${count.index}"
+  name                         = "nomad-multicloud-client-ip-${count.index}"
   location                     = "${var.location}"
-  resource_group_name          = "${data.azurerm_resource_group.hashistack.name}"
+  resource_group_name          = "${data.azurerm_resource_group.nomad-multicloud.name}"
   allocation_method             = "Static"
 }
 
-resource "azurerm_network_interface" "hashistack-client-ni" {
+resource "azurerm_network_interface" "nomad-multicloud-client-ni" {
   count                     = "${var.azure_client_count}"
-  name                      = "hashistack-client-ni-${count.index}"
+  name                      = "nomad-multicloud-client-ni-${count.index}"
   location                  = "${var.location}"
-  resource_group_name       = "${data.azurerm_resource_group.hashistack.name}"
+  resource_group_name       = "${data.azurerm_resource_group.nomad-multicloud.name}"
 
   ip_configuration {
-    name                          = "hashistack-ipc"
-    subnet_id                     = "${azurerm_subnet.hashistack-sn.id}"
+    name                          = "nomad-multicloud-ipc"
+    subnet_id                     = "${azurerm_subnet.nomad-multicloud-sn.id}"
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = "${element(azurerm_public_ip.hashistack-client-public-ip.*.id, count.index)}"
+    public_ip_address_id          = "${element(azurerm_public_ip.nomad-multicloud-client-public-ip.*.id, count.index)}"
   }
 }

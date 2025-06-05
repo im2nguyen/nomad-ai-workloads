@@ -17,10 +17,10 @@ provider "azurerm" {
 }
 
 locals {
-  name = "hashistack"
+  name = "nomad-multicloud"
   location = "eastus"
 }
-resource "azurerm_resource_group" "hashistack" {
+resource "azurerm_resource_group" "nomad-multicloud" {
   name     = local.name
   location = local.location
 }

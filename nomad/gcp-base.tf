@@ -1,10 +1,10 @@
-resource "google_compute_network" "hashistack" {
-  name = "hashistack-${var.name_prefix}"
+resource "google_compute_network" "nomad-multicloud" {
+  name = "nomad-multicloud-${var.name_prefix}"
 }
 
 resource "google_compute_firewall" "ssh_ingress" {
   name          = "${var.name_prefix}-ssh-ingress"
-  network       = google_compute_network.hashistack.name
+  network       = google_compute_network.nomad-multicloud.name
   source_ranges = [var.allowlist_ip]
 
   # SSH
@@ -16,7 +16,7 @@ resource "google_compute_firewall" "ssh_ingress" {
 
 resource "google_compute_firewall" "allow_all_internal" {
   name        = "${var.name_prefix}-allow-all-internal"
-  network     = google_compute_network.hashistack.name
+  network     = google_compute_network.nomad-multicloud.name
   source_tags = ["auto-join"]
 
   allow {
@@ -36,7 +36,7 @@ resource "google_compute_firewall" "allow_all_internal" {
 
 resource "google_compute_firewall" "clients_ingress" {
   name          = "${var.name_prefix}-clients-ingress"
-  network       = google_compute_network.hashistack.name
+  network       = google_compute_network.nomad-multicloud.name
   source_ranges = [var.allowlist_ip]
   target_tags   = ["nomad-clients"]
 

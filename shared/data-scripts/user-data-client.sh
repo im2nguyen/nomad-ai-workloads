@@ -12,11 +12,7 @@ exec > >(sudo tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 
 #-------------------------------------------------------------------------------
 
 CONFIG_DIR=/ops/shared/conf
-
-CONSUL_CONFIG_DIR=/etc/consul.d
-VAULT_CONFIG_DIR=/etc/vault.d
 NOMAD_CONFIG_DIR=/etc/nomad.d
-CONSULTEMPLATE_CONFIG_DIR=/etc/consul-template.d
 
 HOME_DIR=ubuntu
 
@@ -26,9 +22,6 @@ HOME_DIR=ubuntu
 echo "${ca_certificate}"    | base64 -d | zcat > /tmp/agent-ca.pem
 echo "${agent_certificate}" | base64 -d | zcat > /tmp/agent.pem
 echo "${agent_key}"         | base64 -d | zcat > /tmp/agent-key.pem
-
-# Consul clients do not need certificates because auto_tls generates them automatically.
-sudo cp /tmp/agent-ca.pem $CONSUL_CONFIG_DIR/consul-agent-ca.pem
 
 sudo cp /tmp/agent-ca.pem $NOMAD_CONFIG_DIR/nomad-agent-ca.pem
 sudo cp /tmp/agent.pem $NOMAD_CONFIG_DIR/nomad-agent.pem
@@ -72,7 +65,7 @@ esac
 # Environment variables
 #-------------------------------------------------------------------------------
 
-CONSUL_RETRY_JOIN="${retry_join}"
+NOMAD_RETRY_JOIN="${retry_join}"
 
 # nomad.hcl variables needed
 NOMAD_DATACENTER="${datacenter}"
@@ -93,10 +86,6 @@ NOMAD_CLIENT_NODE_POOL=${node_pool}
 #   sudo mkdir -p /opt/cni/bin && \
 #   sudo tar -C /opt/cni/bin -xzf cni-plugins.tgz
 
-# export CONSUL_CNI_PLUGIN_VERSION=1.5.1
-# curl -L -o consul-cni.zip "https://releases.hashicorp.com/consul-cni/$CONSUL_CNI_PLUGIN_VERSION/consul-cni_"$CONSUL_CNI_PLUGIN_VERSION"_linux_$ARCH_CNI".zip && \
-#   sudo unzip consul-cni.zip -d /opt/cni/bin -x LICENSE.txt
-
 # Configure and start Nomad
 #-------------------------------------------------------------------------------
 
@@ -108,7 +97,7 @@ set -x
 # Replace [,] with [","] in the list of IPs to correctly format
 # them for the retry_join attribute
 TEMP_RETRY_JOIN_FILE=$NOMAD_CONFIG_DIR/temp-retry-join-list
-echo $CONSUL_RETRY_JOIN > $TEMP_RETRY_JOIN_FILE
+echo $NOMAD_RETRY_JOIN > $TEMP_RETRY_JOIN_FILE
 sudo sed -i 's|,|","|g' $TEMP_RETRY_JOIN_FILE
 
 # Populate the file with values from the variables
@@ -116,9 +105,7 @@ sudo sed -i "s/_NOMAD_DATACENTER/$NOMAD_DATACENTER/g" $NOMAD_CONFIG_DIR/nomad.hc
 sudo sed -i "s/_NOMAD_DOMAIN/$NOMAD_DOMAIN/g" $NOMAD_CONFIG_DIR/nomad.hcl
 sudo sed -i "s/_NOMAD_NODE_NAME/$NOMAD_NODE_NAME/g" $NOMAD_CONFIG_DIR/nomad.hcl
 sudo sed -i "s/_NOMAD_AGENT_META/$NOMAD_AGENT_META/g" $NOMAD_CONFIG_DIR/nomad.hcl
-sudo sed -i "s/_CONSUL_RETRY_JOIN/$(cat $TEMP_RETRY_JOIN_FILE)/g" $NOMAD_CONFIG_DIR/nomad.hcl
-# sudo sed -i "s/_CONSUL_AGENT_TOKEN/$NOMAD_AGENT_TOKEN/g" $NOMAD_CONFIG_DIR/nomad.hcl
-
+sudo sed -i "s/_NOMAD_RETRY_JOIN/$(cat $TEMP_RETRY_JOIN_FILE)/g" $NOMAD_CONFIG_DIR/nomad.hcl
 sudo sed -i "s/_PUBLIC_IP_ADDRESS/$PUBLIC_IP_ADDRESS/g" $NOMAD_CONFIG_DIR/nomad.hcl
 sudo sed -i "s/_NODE_POOL/$NOMAD_CLIENT_NODE_POOL/g" $NOMAD_CONFIG_DIR/nomad.hcl
 

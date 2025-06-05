@@ -15,7 +15,7 @@ variable "region" {
   type = string
 }
 
-data "amazon-ami" "hashistack" {
+data "amazon-ami" "nomad-multicloud" {
   filters = {
     architecture                       = "x86_64"
     "block-device-mapping.volume-type" = "gp2"
@@ -29,11 +29,11 @@ data "amazon-ami" "hashistack" {
 }
 
 
-source "amazon-ebs" "hashistack" {
-  ami_name      = "hashistack-${local.timestamp}"
+source "amazon-ebs" "nomad-multicloud" {
+  ami_name      = "nomad-multicloud-${local.timestamp}"
   instance_type = "t2.medium"
   region        = var.region
-  source_ami    = "${data.amazon-ami.hashistack.id}"
+  source_ami    = "${data.amazon-ami.nomad-multicloud.id}"
   ssh_username  = "ubuntu"
   force_deregister = true
   force_delete_snapshot = true
@@ -56,7 +56,7 @@ source "amazon-ebs" "hashistack" {
 }
 
 build {
-  sources = ["source.amazon-ebs.hashistack"]
+  sources = ["source.amazon-ebs.nomad-multicloud"]
 
   provisioner "shell" {
     inline = ["sudo mkdir -p /ops/shared", "sudo chmod 777 -R /ops"]

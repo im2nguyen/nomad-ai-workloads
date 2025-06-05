@@ -13,7 +13,7 @@ data_dir = "/opt/nomad"
 
 # Logging
 log_level = "INFO"
-# enable_syslog = false
+enable_syslog = false
 enable_debug = false
 
 # -----------------------------+
@@ -26,7 +26,7 @@ server {
   encrypt = "_NOMAD_ENCRYPTION_KEY"
 
   server_join {
-    retry_join = [ "_CONSUL_RETRY_JOIN" ]
+    retry_join = [ "_NOMAD_RETRY_JOIN" ]
   }
 }
 

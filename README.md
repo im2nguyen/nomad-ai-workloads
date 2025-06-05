@@ -16,7 +16,7 @@ Nomad cluster setup with no additional software (Consul, Vault, etc).
   ```
 
 ### Create Azure resource group
-This resource group will contain the compute resources as well as the machine image. It's created _outside_ of the main configuration as running a `terraform destroy` with it in the main config will destroy the group and _all_ resources in it, including the machine image.
+This resource group will contain the compute resources as well as the machine image. Creating it outside of the main config allows the infrastructure to be created and destroyed without deleting the machine image, which is saved in the resource group.
 
 ```
 cd azure-dependencies
@@ -26,16 +26,20 @@ terraform apply
 ### Rename example variables file
 
 ```
+cd nomad
 mv variables.hcl.example variables.hcl
 ```
 
 ### Build machine images
 
+Run for each cloud environment: `aws`, `azure`, and `gcp`.
+
 ```
-packer init && packer build -var-file=variables.hcl (aws|azure|gcp)-image.pkr.hcl
+packer init (aws|azure|gcp)-image.pkr.hcl
+packer build -var-file=variables.hcl (aws|azure|gcp)-image.pkr.hcl
 ```
 
-Copy the image name from the output and paste it into the appropriate field in `variables.hcl`: `aws_ami`, `azure_image_name`, or `gcp_machine_image`.
+Copy the image name from the output and paste it into the appropriate field in `variables.hcl`: `aws_ami`, `azure_image_name`, and `gcp_machine_image`.
 
 ### Update `variables.hcl`
 
@@ -44,6 +48,5 @@ Update the values in the variables file with cloud project configurations (regio
 ### Create the infrastructure
 
 ```
-cd nomad
 terraform apply -var-file=variables.hcl
 ```

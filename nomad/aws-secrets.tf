@@ -7,12 +7,12 @@ resource "tls_private_key" "vm_ssh_key" {
   rsa_bits  = 4096
 }
 
-resource "aws_key_pair" "vm_ssh_key-pair" {
+resource "aws_key_pair" "vm_ssh_key_pair" {
   key_name   = "${local.prefix}-aws-key-pair"
   public_key = tls_private_key.vm_ssh_key.public_key_openssh
 }
 
-resource "local_file" "vm_ssh_key-file" {
+resource "local_file" "vm_ssh_key_file" {
   content         = tls_private_key.vm_ssh_key.private_key_pem
   filename        = "./certs/aws-key-pair.pem"
   file_permission = "0400"
@@ -122,14 +122,14 @@ resource "tls_locally_signed_cert" "server_cert" {
 
 # Client Keys
 resource "tls_private_key" "client_key" {
-  count       = "${var.aws_client_count}"
+  count       = "${var.aws_private_client_count}"
   algorithm   = "ECDSA"
   ecdsa_curve = "P384"
 }
 
 # Client CSR
 resource "tls_cert_request" "client_csr" {
-  count = "${var.aws_client_count}"
+  count = "${var.aws_private_client_count}"
   private_key_pem = "${element(tls_private_key.client_key.*.private_key_pem, count.index)}"
 
   subject {
@@ -156,7 +156,7 @@ resource "tls_cert_request" "client_csr" {
 
 # Client Certs
 resource "tls_locally_signed_cert" "client_cert" {
-  count = "${var.aws_client_count}"
+  count = "${var.aws_private_client_count}"
   cert_request_pem = "${element(tls_cert_request.client_csr.*.cert_request_pem, count.index)}"
 
   ca_private_key_pem = "${tls_private_key.datacenter_ca.private_key_pem}"
@@ -233,7 +233,7 @@ resource "random_uuid" "nomad_mgmt_token" {
 }
 
 # Nomad token for UI access
-resource "nomad_acl_policy" "nomad-user-policy" {
+resource "nomad_acl_policy" "nomad_user_policy" {
   name        = "nomad-user"
   description = "Submit jobs to the environment."
 
@@ -253,7 +253,7 @@ namespace "*" {
 EOT
 }
 
-resource "nomad_acl_token" "nomad-user-token" {
+resource "nomad_acl_token" "nomad_user_token" {
   name     = "nomad-user-token"
   type     = "client"
   policies = ["nomad-user"]

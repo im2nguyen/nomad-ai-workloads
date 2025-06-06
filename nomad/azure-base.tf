@@ -12,57 +12,59 @@ resource "random_string" "vm_password" {
   special          = false
 }
 
-data "azurerm_resource_group" "nomad-multicloud" {
+data "azurerm_resource_group" "nomad_multicloud" {
   name = "${var.name_prefix}"
 }
 
-resource "azurerm_virtual_network" "nomad-multicloud-vn" {
+resource "azurerm_virtual_network" "nomad_multicloud_vn" {
   name                = "${local.prefix}-vn"
   address_space       = ["10.0.0.0/16"]
   location            = "${var.azure_location}"
-  resource_group_name = "${data.azurerm_resource_group.nomad-multicloud.name}"
+  resource_group_name = "${data.azurerm_resource_group.nomad_multicloud.name}"
 }
 
-resource "azurerm_subnet" "nomad-multicloud-sn" {
-  name                 = "${local.prefix}-sn"
-  resource_group_name  = "${data.azurerm_resource_group.nomad-multicloud.name}"
-  virtual_network_name = "${azurerm_virtual_network.nomad-multicloud-vn.name}"
+# Private clients
+
+resource "azurerm_subnet" "private_clients_subnet" {
+  name                 = "${local.prefix}-private-clients-subnet"
+  resource_group_name  = "${data.azurerm_resource_group.nomad_multicloud.name}"
+  virtual_network_name = "${azurerm_virtual_network.nomad_multicloud_vn.name}"
   address_prefixes       = ["10.0.2.0/24"]
 }
 
-resource "azurerm_network_security_group" "nomad-multicloud-sg" {
-  name                = "${local.prefix}-sg"
+resource "azurerm_network_security_group" "private_clients_security_group" {
+  name                = "${local.prefix}-private-clients-sg"
   location            = "${var.azure_location}"
-  resource_group_name = "${data.azurerm_resource_group.nomad-multicloud.name}"
+  resource_group_name = "${data.azurerm_resource_group.nomad_multicloud.name}"
 }
 
-resource "azurerm_subnet_network_security_group_association" "nomad-multicloud-sg-association" {
-  subnet_id                 = azurerm_subnet.nomad-multicloud-sn.id
-  network_security_group_id = azurerm_network_security_group.nomad-multicloud-sg.id
+resource "azurerm_subnet_network_security_group_association" "private_clients_sg_association" {
+  subnet_id                 = azurerm_subnet.private_clients_subnet.id
+  network_security_group_id = azurerm_network_security_group.private_clients_security_group.id
 }
 
-resource "azurerm_network_security_rule" "client_ports_outbound" {
-  name                        = "${local.prefix}-client-ports-outbound"
-  resource_group_name         = "${data.azurerm_resource_group.nomad-multicloud.name}"
-  network_security_group_name = "${azurerm_network_security_group.nomad-multicloud-sg.name}"
+resource "azurerm_network_security_rule" "private_clients_outbound" {
+  name                        = "${local.prefix}-private-clients-outbound"
+  resource_group_name         = "${data.azurerm_resource_group.nomad_multicloud.name}"
+  network_security_group_name = "${azurerm_network_security_group.private_clients_security_group.name}"
 
-  priority  = 106
+  priority  = 110
   direction = "Outbound"
   access    = "Allow"
   protocol  = "*"
 
-  source_address_prefix      = var.azure_allowlist_ip
+  source_address_prefix      = "*"
   source_port_range          = "*"
   destination_port_range     = "*"
   destination_address_prefix = "*"
 }
 
-resource "azurerm_network_security_rule" "ssh_ingress" {
-  name                        = "${local.prefix}-ssh-ingress"
-  resource_group_name         = "${data.azurerm_resource_group.nomad-multicloud.name}"
-  network_security_group_name = "${azurerm_network_security_group.nomad-multicloud-sg.name}"
+resource "azurerm_network_security_rule" "private_clients_ssh_ingress" {
+  name                        = "${local.prefix}-private-clients-ssh-ingress"
+  resource_group_name         = "${data.azurerm_resource_group.nomad_multicloud.name}"
+  network_security_group_name = "${azurerm_network_security_group.private_clients_security_group.name}"
 
-  priority  = 100
+  priority  = 111
   direction = "Inbound"
   access    = "Allow"
   protocol  = "Tcp"
@@ -73,44 +75,114 @@ resource "azurerm_network_security_rule" "ssh_ingress" {
   destination_address_prefix = "*"
 }
 
-resource "azurerm_network_security_rule" "clients_ingress" {
-  name                        = "${local.prefix}-clients-ingress"
-  resource_group_name         = "${data.azurerm_resource_group.nomad-multicloud.name}"
-  network_security_group_name = "${azurerm_network_security_group.nomad-multicloud-sg.name}"
+resource "azurerm_public_ip" "private_client_public_ip" {
+  count                        = "${var.azure_private_client_count}"
+  name                         = "${local.prefix}-private-client-ip-${count.index}"
+  location                     = "${var.azure_location}"
+  resource_group_name          = "${data.azurerm_resource_group.nomad_multicloud.name}"
+  allocation_method             = "Static"
+}
 
-  priority  = 110
+resource "azurerm_network_interface" "private_client_ni" {
+  count                     = "${var.azure_private_client_count}"
+  name                      = "${local.prefix}-private-client-ni-${count.index}"
+  location                  = "${var.azure_location}"
+  resource_group_name       = "${data.azurerm_resource_group.nomad_multicloud.name}"
+
+  ip_configuration {
+    name                          = "${local.prefix}-private-client-ipc"
+    subnet_id                     = "${azurerm_subnet.private_clients_subnet.id}"
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = "${element(azurerm_public_ip.private_client_public_ip.*.id, count.index)}"
+  }
+}
+
+# Public clients
+
+resource "azurerm_subnet" "public_clients_subnet" {
+  name                 = "${local.prefix}-public-clients-subnet"
+  resource_group_name  = "${data.azurerm_resource_group.nomad_multicloud.name}"
+  virtual_network_name = "${azurerm_virtual_network.nomad_multicloud_vn.name}"
+  address_prefixes       = ["10.0.3.0/24"]
+}
+
+resource "azurerm_network_security_group" "public_clients_security_group" {
+  name                = "${local.prefix}-public-clients-sg"
+  location            = "${var.azure_location}"
+  resource_group_name = "${data.azurerm_resource_group.nomad_multicloud.name}"
+}
+
+resource "azurerm_subnet_network_security_group_association" "public_clients_sg_association" {
+  subnet_id                 = azurerm_subnet.public_clients_subnet.id
+  network_security_group_id = azurerm_network_security_group.public_clients_security_group.id
+}
+
+resource "azurerm_network_security_rule" "public_clients_outbound" {
+  name                        = "${local.prefix}-public-clients-outbound"
+  resource_group_name         = "${data.azurerm_resource_group.nomad_multicloud.name}"
+  network_security_group_name = "${azurerm_network_security_group.public_clients_security_group.name}"
+
+  priority  = 210
+  direction = "Outbound"
+  access    = "Allow"
+  protocol  = "*"
+
+  source_address_prefix      = "*"
+  source_port_range          = "*"
+  destination_port_range     = "*"
+  destination_address_prefix = "*"
+}
+
+resource "azurerm_network_security_rule" "public_clients_ssh_ingress" {
+  name                        = "${local.prefix}-public-clients-ssh-ingress"
+  resource_group_name         = "${data.azurerm_resource_group.nomad_multicloud.name}"
+  network_security_group_name = "${azurerm_network_security_group.public_clients_security_group.name}"
+
+  priority  = 211
   direction = "Inbound"
   access    = "Allow"
   protocol  = "Tcp"
 
-  # Add application ingress rules here
-  # These rules are applied only to the client nodes
-
-  # nginx example; replace with your application port
-  source_address_prefix      = "*"
+  source_address_prefix      = var.azure_allowlist_ip
   source_port_range          = "*"
-  destination_port_range     = "80"
+  destination_port_range     = "22"
   destination_address_prefix = "*"
 }
 
-resource "azurerm_public_ip" "nomad-multicloud-client-public-ip" {
-  count                        = "${var.azure_client_count}"
-  name                         = "${local.prefix}-client-ip-${count.index}"
+resource "azurerm_network_security_rule" "public_clients_external_ingress" {
+  name                        = "${local.prefix}-public-clients-external-ingress"
+  resource_group_name         = "${data.azurerm_resource_group.nomad_multicloud.name}"
+  network_security_group_name = "${azurerm_network_security_group.public_clients_security_group.name}"
+
+  priority  = 212
+  direction = "Inbound"
+  access    = "Allow"
+  protocol  = "Tcp"
+
+  source_address_prefix      = "*"
+  source_port_range          = "*"
+  destination_port_ranges    = ["80"]
+  destination_address_prefix = "*"
+}
+
+resource "azurerm_public_ip" "public_client_public_ip" {
+  count                        = "${var.azure_public_client_count}"
+  name                         = "${local.prefix}-public-client-ip-${count.index}"
   location                     = "${var.azure_location}"
-  resource_group_name          = "${data.azurerm_resource_group.nomad-multicloud.name}"
+  resource_group_name          = "${data.azurerm_resource_group.nomad_multicloud.name}"
   allocation_method             = "Static"
 }
 
-resource "azurerm_network_interface" "nomad-multicloud-client-ni" {
-  count                     = "${var.azure_client_count}"
-  name                      = "${local.prefix}-client-ni-${count.index}"
+resource "azurerm_network_interface" "public_client_ni" {
+  count                     = "${var.azure_public_client_count}"
+  name                      = "${local.prefix}-public-client-ni-${count.index}"
   location                  = "${var.azure_location}"
-  resource_group_name       = "${data.azurerm_resource_group.nomad-multicloud.name}"
+  resource_group_name       = "${data.azurerm_resource_group.nomad_multicloud.name}"
 
   ip_configuration {
-    name                          = "${local.prefix}-ipc"
-    subnet_id                     = "${azurerm_subnet.nomad-multicloud-sn.id}"
+    name                          = "${local.prefix}-public-client-ipc"
+    subnet_id                     = "${azurerm_subnet.public_clients_subnet.id}"
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = "${element(azurerm_public_ip.nomad-multicloud-client-public-ip.*.id, count.index)}"
+    public_ip_address_id          = "${element(azurerm_public_ip.public_client_public_ip.*.id, count.index)}"
   }
 }

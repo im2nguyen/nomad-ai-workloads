@@ -12,7 +12,7 @@ aws_ami                         = "OUTPUT_FROM_AWS_PACKER_BUILD"
 # aws_server_instance_type      = "t2.micro"
 # aws_server_count              = "3"
 # aws_client_instance_type      = "t2.medium"
-# aws_client_count              = "1"
+# aws_private_client_count      = "1"
 # aws_public_client_count       = "1"
 
 # -----------------------------------
@@ -30,7 +30,8 @@ azure_resource_group_name       = "nomad-multicloud"
 
 # Default values:
 # azure_client_instance_type    = "Standard_B1s"
-# azure_client_count            = "1"
+# azure_private_client_count    = "1"
+# azure_public_client_count     = "1"
 
 # -----------------------------------
 # GCP VARIABLES
@@ -44,4 +45,5 @@ gcp_zone                        = "GCP_ZONE"
 # Terraform variables
 gcp_machine_image               = "OUTPUT_FROM_GCP_PACKER_BUILD"
 # gcp_client_instance_type      = "e2-micro"
-# gcp_client_count              = "1"
+# gcp_private_client_count      = "1"
+# gcp_public_client_count       = "1"

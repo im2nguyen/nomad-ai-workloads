@@ -19,12 +19,17 @@ variable "gcp_client_instance_type" {
   default     = "e2-micro"
 }
 
-variable "gcp_client_count" {
-  description = "The number of clients to provision."
-  default     = "1"
-}
-
 variable "gcp_root_block_device_size" {
   description = "The volume size of the root block device."
   default     = 20
+}
+
+variable "gcp_private_client_count" {
+  description = "The number of private clients to provision."
+  default     = "1"
+}
+
+variable "gcp_public_client_count" {
+  description = "The number of publicly accessible clients to provision."
+  default     = "1"
 }

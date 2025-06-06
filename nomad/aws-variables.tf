@@ -43,7 +43,7 @@ variable "aws_public_client_count" {
   default     = "1"
 }
 
-variable "aws_client_count" {
+variable "aws_private_client_count" {
   description = "The number of private clients to provision."
   default     = "1"
 }

@@ -1,11 +1,12 @@
-resource "google_compute_network" "nomad-multicloud" {
+resource "google_compute_network" "nomad_multicloud" {
   name = "${local.prefix}-network"
 }
 
 resource "google_compute_firewall" "ssh_ingress" {
   name          = "${local.prefix}-ssh-ingress"
-  network       = google_compute_network.nomad-multicloud.name
+  network       = google_compute_network.nomad_multicloud.name
   source_ranges = [var.allowlist_ip]
+  target_tags   = ["nomad-client"]
 
   # SSH
   allow {
@@ -16,8 +17,9 @@ resource "google_compute_firewall" "ssh_ingress" {
 
 resource "google_compute_firewall" "allow_all_internal" {
   name        = "${local.prefix}-allow-all-internal"
-  network     = google_compute_network.nomad-multicloud.name
-  source_tags = ["auto-join"]
+  network     = google_compute_network.nomad_multicloud.name
+  source_tags = ["nomad-client"]
+  target_tags = ["nomad-client"]
 
   allow {
     protocol = "icmp"
@@ -34,16 +36,12 @@ resource "google_compute_firewall" "allow_all_internal" {
   }
 }
 
-resource "google_compute_firewall" "clients_ingress" {
-  name          = "${local.prefix}-clients-ingress"
-  network       = google_compute_network.nomad-multicloud.name
-  source_ranges = [var.allowlist_ip]
-  target_tags   = ["nomad-clients"]
+resource "google_compute_firewall" "public_client_ingress" {
+  name          = "${local.prefix}-public-client-ingress"
+  network       = google_compute_network.nomad_multicloud.name
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["nomad-public-client"]
 
-  # Add application ingress rules here
-  # These rules are applied only to the client nodes
-
-  # nginx example; replace with your application port
   allow {
     protocol = "tcp"
     ports    = [80]

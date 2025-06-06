@@ -92,8 +92,8 @@ resource "aws_security_group" "allow_all_internal" {
   }
 }
 
-resource "aws_security_group" "clients_ingress" {
-  name   = "${local.prefix}-clients-ingress"
+resource "aws_security_group" "public_client_ingress" {
+  name   = "${local.prefix}-public-client-ingress"
   vpc_id = module.vpc.vpc_id
 
   egress {
@@ -104,36 +104,19 @@ resource "aws_security_group" "clients_ingress" {
   }
 
   # Add application ingress rules here
-  # These rules are applied only to the client nodes
+  # These rules are applied only to the PUBLIC client nodes
 
-  # HTTP ingress
   ingress {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
-  # HTTPS ingress
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # HTTPS ingress
-  ingress {
-    from_port   = 8443
-    to_port     = 8443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 }
 
-# External ingress from client nodes running in azure
-resource "aws_security_group" "azure_clients_ingress" {
-  name   = "${local.prefix}-azure-clients-ingress"
+# External ingress for client nodes running outside of aws
+resource "aws_security_group" "external_client_ingress" {
+  name   = "${local.prefix}-external-client-ingress"
   vpc_id = module.vpc.vpc_id
 
   # Nomad TCP ports

@@ -9,13 +9,13 @@ resource "aws_instance" "server" {
 
   ami                    = var.aws_ami
   instance_type          = var.aws_server_instance_type
-  key_name               = aws_key_pair.vm_ssh_key-pair.key_name
+  key_name               = aws_key_pair.vm_ssh_key_pair.key_name
   associate_public_ip_address = true
   vpc_security_group_ids = [
     aws_security_group.nomad_ui_ingress.id, 
     aws_security_group.ssh_ingress.id, 
     aws_security_group.allow_all_internal.id,
-    aws_security_group.azure_clients_ingress.id
+    aws_security_group.external_client_ingress.id
   ]
   subnet_id = module.vpc.public_subnets[0]
 
@@ -76,16 +76,15 @@ resource "aws_instance" "server" {
 resource "aws_instance" "client" {
   
   depends_on             = [aws_instance.server]
-  count                  = var.aws_client_count
+  count                  = var.aws_private_client_count
   
   ami                    = var.aws_ami
   instance_type          = var.aws_client_instance_type
-  key_name               = aws_key_pair.vm_ssh_key-pair.key_name
+  key_name               = aws_key_pair.vm_ssh_key_pair.key_name
   associate_public_ip_address = true
   vpc_security_group_ids = [
     aws_security_group.ssh_ingress.id,
     aws_security_group.allow_all_internal.id
-    # aws_security_group.azure_clients_ingress.id
   ]
   subnet_id = module.vpc.public_subnets[0]
 
@@ -137,19 +136,18 @@ resource "aws_instance" "public_client" {
   
   ami                    = var.aws_ami
   instance_type          = var.aws_client_instance_type
-  key_name               = aws_key_pair.vm_ssh_key-pair.key_name
+  key_name               = aws_key_pair.vm_ssh_key_pair.key_name
   associate_public_ip_address = true
   vpc_security_group_ids = [
     aws_security_group.ssh_ingress.id,
     aws_security_group.allow_all_internal.id,
-    aws_security_group.clients_ingress.id
-    # aws_security_group.azure_clients_ingress.id
+    aws_security_group.public_client_ingress.id
   ]
   subnet_id = module.vpc.public_subnets[0]
 
   # NomadJoinTag is necessary for nodes to automatically join the cluster
   tags = {
-    Name = "${local.prefix}-ingress-client-${count.index}",
+    Name = "${local.prefix}-public-client-${count.index}",
     NomadJoinTag = "auto-join-${random_string.suffix.result}",
     NomadType = "client"
   } 
@@ -174,7 +172,7 @@ resource "aws_instance" "public_client" {
     node_pool               = "aws"
     retry_join              = local.retry_join_nomad,
     nomad_node_name         = "aws-public-client-${count.index}"
-    nomad_agent_meta        = "isPublic = true, nodeRole = \"ingress\", cloud = \"aws\""
+    nomad_agent_meta        = "isPublic = true, cloud = \"aws\""
     ca_certificate          = base64gzip("${tls_self_signed_cert.datacenter_ca.cert_pem}")
     agent_certificate       = base64gzip("${tls_locally_signed_cert.client_cert[count.index].cert_pem}")
     agent_key               = base64gzip("${tls_private_key.client_key[count.index].private_key_pem}")

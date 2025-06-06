@@ -20,7 +20,12 @@ variable "azure_client_instance_type" {
   default     = "Standard_B1s"
 }
 
-variable "azure_client_count" {
-  description = "The number of clients to provision."
+variable "azure_private_client_count" {
+  description = "The number of private clients to provision."
+  default     = "1"
+}
+
+variable "azure_public_client_count" {
+  description = "The number of publicly accessible clients to provision."
   default     = "1"
 }

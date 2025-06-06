@@ -10,7 +10,7 @@ resource "local_file" "environment_variables" {
   EOT
 }
 
-output "configure-local-environment" {
+output "configure_local_environment" {
   value = "source ./datacenter.env"
 }
 
@@ -24,7 +24,7 @@ output "nomad_management_token" {
 }
 
 output "nomad_user_token" {
-  value = nonsensitive(nomad_acl_token.nomad-user-token.secret_id)
+  value = nonsensitive(nomad_acl_token.nomad_user_token.secret_id)
 }
 
 # output "debug_aws_server_ssh" {

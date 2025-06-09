@@ -80,11 +80,11 @@ NOMAD_CLIENT_NODE_POOL=${node_pool}
 
 # Install and link CNI Plugins to support Consul Connect-Enabled jobs
 
-# export ARCH_CNI=$( [ $(uname -m) = aarch64 ] && echo arm64 || echo amd64)
-# export CNI_PLUGIN_VERSION=v1.5.1
-# curl -L -o cni-plugins.tgz "https://github.com/containernetworking/plugins/releases/download/$CNI_PLUGIN_VERSION/cni-plugins-linux-$ARCH_CNI-$CNI_PLUGIN_VERSION".tgz && \
-#   sudo mkdir -p /opt/cni/bin && \
-#   sudo tar -C /opt/cni/bin -xzf cni-plugins.tgz
+export ARCH_CNI=$( [ $(uname -m) = aarch64 ] && echo arm64 || echo amd64)
+export CNI_PLUGIN_VERSION=v1.5.1
+curl -L -o cni-plugins.tgz "https://github.com/containernetworking/plugins/releases/download/$CNI_PLUGIN_VERSION/cni-plugins-linux-$ARCH_CNI-$CNI_PLUGIN_VERSION".tgz && \
+  sudo mkdir -p /opt/cni/bin && \
+  sudo tar -C /opt/cni/bin -xzf cni-plugins.tgz
 
 # Configure and start Nomad
 #-------------------------------------------------------------------------------

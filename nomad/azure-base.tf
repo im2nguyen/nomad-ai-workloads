@@ -10,6 +10,9 @@ resource "random_uuid" "nomad_token" {
 resource "random_string" "vm_password" {
   length           = 16
   special          = false
+  min_upper        = 1
+  min_lower        = 1
+  min_numeric      = 1
 }
 
 data "azurerm_resource_group" "nomad_multicloud" {

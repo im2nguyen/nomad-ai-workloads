@@ -10,7 +10,7 @@ export DEBIAN_FRONTEND="noninteractive"
 pushd /ops
 
 CONFIGDIR=/ops/shared/conf
-NOMADVERSION=1.8.3
+NOMADVERSION=1.10.1
 
 # Dependencies
 case $CLOUD_ENV in

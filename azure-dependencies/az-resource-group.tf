@@ -16,7 +16,13 @@ provider "azurerm" {
   features {}
 }
 
+# NOTE: These must match the values set in /nomad/variables.hcl
+locals {
+  azure_resource_group_name   = "nomad-multicloud"
+  azure_location              = "eastus"
+}
+
 resource "azurerm_resource_group" "nomad_multicloud" {
-  name     = var.name_prefix
-  location = var.azure_location
+  name                        = local.azure_resource_group_name
+  location                    = local.azure_location
 }

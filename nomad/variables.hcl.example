@@ -20,13 +20,16 @@ aws_ami                         = "OUTPUT_FROM_AWS_PACKER_BUILD"
 # -----------------------------------
 
 # Packer variables
-azure_location                  = "AZURE_REGION"
+# If using a different location, update the value here and in
+# /azure-dependencies/az-resource-group.tf
+# azure_location                  = "eastus"
 
 # Terraform variables
 azure_image_name                = "OUTPUT_FROM_AZURE_PACKER_BUILD"
+
 # azure_resource_group_name must match the value for name_prefix
-# in variables.tf
-azure_resource_group_name       = "nomad-multicloud"
+# in /nomad/variables.tf and in /azure-dependencies/az-resource-group.tf
+# azure_resource_group_name       = "nomad-multicloud"
 
 # Default values:
 # azure_client_instance_type    = "Standard_B1s"

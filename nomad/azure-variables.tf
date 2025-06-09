@@ -1,5 +1,6 @@
 variable "azure_location" {
   description = "The Azure region to deploy to."
+  default     = "eastus"
 }
 
 variable "azure_image_name" {
@@ -8,6 +9,7 @@ variable "azure_image_name" {
 
 variable "azure_resource_group_name" {
   description = "The Azure resource group name to use."
+  default     = "nomad-multicloud"
 }
 
 variable "azure_allowlist_ip" {

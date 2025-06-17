@@ -1,8 +1,55 @@
 #!/bin/bash
 
+# --- BEGIN SETUP.SH --- #
+
 set -e
 
-exec > >(sudo tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
+# Disable interactive apt prompts
+export DEBIAN_FRONTEND="noninteractive"
+
+mkdir -p /ops/shared/conf
+
+CONFIGDIR=/ops/shared/conf
+NOMADVERSION=1.10.1
+
+sudo apt-get update && sudo apt-get install -y software-properties-common
+
+sudo add-apt-repository universe && sudo apt-get update
+sudo apt-get install -y unzip tree redis-tools jq curl tmux
+sudo apt-get clean
+
+
+# Disable the firewall
+
+sudo ufw disable || echo "ufw not installed"
+
+# Docker
+# distro=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
+sudo apt-get install -y apt-transport-https ca-certificates gnupg2
+
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+
+sudo apt-get update
+sudo apt-get install -y docker-ce
+
+# Java
+sudo add-apt-repository -y ppa:openjdk-r/ppa
+sudo apt-get update 
+sudo apt-get install -y openjdk-8-jdk
+JAVA_HOME=$(readlink -f /usr/bin/java | sed "s:bin/java::")
+
+
+# Install HashiCorp Apt Repository
+wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+
+# Install Nomad package
+sudo apt-get update && sudo apt-get -y install nomad=$NOMADVERSION*
+
+# --- END SETUP.SH --- #
+
+# exec > >(sudo tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
 
 #-------------------------------------------------------------------------------
 # Configure and start clients
@@ -56,7 +103,7 @@ case $CLOUD in
     echo "CLOUD_ENV: azure"
     IP_ADDRESS=$(curl -s -H Metadata:true --noproxy "*" http://169.254.169.254/metadata/instance/network/interface/0/ipv4/ipAddress/0?api-version=2021-12-13 | jq -r '.["privateIpAddress"]')
     # PUBLIC_IP_ADDRESS=$(curl -s -H Metadata:true --noproxy "*" http://169.254.169.254/metadata/instance/network/interface/0/ipv4/ipAddress/0?api-version=2021-12-13 | jq -r '.["publicIpAddress"]')
-
+    
     # Standard SKU public IPs aren't in the instance metadata but rather in the loadbalancer
     PUBLIC_IP_ADDRESS=$(curl -s -H Metadata:true --noproxy "*" http://169.254.169.254/metadata/loadbalancer?api-version=2020-10-01 | jq -r '.loadbalancer.publicIpAddresses[0].frontendIpAddress')
     ;;
@@ -93,9 +140,84 @@ curl -L -o cni-plugins.tgz "https://github.com/containernetworking/plugins/relea
 #-------------------------------------------------------------------------------
 
 # Copy template into Nomad configuration directory
-sudo cp $CONFIG_DIR/nomad-client.hcl $NOMAD_CONFIG_DIR/nomad.hcl
+# sudo cp $CONFIG_DIR/nomad-client.hcl $NOMAD_CONFIG_DIR/nomad.hcl
 
-set -x 
+rm -f $NOMAD_CONFIG_DIR/nomad.hcl
+
+# set -x 
+
+# Create nomad agent config file
+tee $NOMAD_CONFIG_DIR/nomad.hcl <<EOF
+# -----------------------------+
+# BASE CONFIG                  |
+# -----------------------------+
+
+datacenter = "_NOMAD_DATACENTER"
+region = "_NOMAD_DOMAIN"
+
+# Nomad node name
+name = "_NOMAD_NODE_NAME"
+
+# Data Persistence
+data_dir = "/opt/nomad"
+
+# Logging
+log_level = "INFO"
+enable_syslog = false
+enable_debug = false
+
+# -----------------------------+
+# CLIENT CONFIG                |
+# -----------------------------+
+
+client {
+  enabled = true
+  options {
+    "driver.raw_exec.enable"    = "1"
+    "docker.privileged.enabled" = "true"
+  }
+  meta {
+    _NOMAD_AGENT_META
+  }
+  server_join {
+    retry_join = [ "_NOMAD_RETRY_JOIN" ]
+  }
+  node_pool = "_NODE_POOL"
+}
+
+# -----------------------------+
+# NETWORKING CONFIG            |
+# -----------------------------+
+
+bind_addr = "0.0.0.0"
+
+advertise {
+  http = "_PUBLIC_IP_ADDRESS:4646"
+  rpc  = "_PUBLIC_IP_ADDRESS:4647"
+  serf = "_PUBLIC_IP_ADDRESS:4648"
+}
+
+# TLS Encryption              
+# -----------------------------
+
+tls {
+  http      = true
+  rpc       = true
+
+  ca_file   = "/etc/nomad.d/nomad-agent-ca.pem"
+  cert_file = "/etc/nomad.d/nomad-agent.pem"
+  key_file  = "/etc/nomad.d/nomad-agent-key.pem"
+
+  verify_server_hostname = true
+}
+
+# ACL Configuration              
+# -----------------------------
+
+acl {
+  enabled = true
+}
+EOF
 
 # Replace [,] with [","] in the list of IPs to correctly format
 # them for the retry_join attribute

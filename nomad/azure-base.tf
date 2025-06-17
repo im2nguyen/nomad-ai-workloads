@@ -83,7 +83,8 @@ resource "azurerm_public_ip" "private_client_public_ip" {
   name                         = "${local.prefix}-private-client-ip-${count.index}"
   location                     = "${var.azure_location}"
   resource_group_name          = "${data.azurerm_resource_group.nomad_multicloud.name}"
-  allocation_method             = "Static"
+  allocation_method            = "Static"
+  sku                          = "Standard" 
 }
 
 resource "azurerm_network_interface" "private_client_ni" {
@@ -173,7 +174,8 @@ resource "azurerm_public_ip" "public_client_public_ip" {
   name                         = "${local.prefix}-public-client-ip-${count.index}"
   location                     = "${var.azure_location}"
   resource_group_name          = "${data.azurerm_resource_group.nomad_multicloud.name}"
-  allocation_method             = "Static"
+  allocation_method            = "Static"
+  sku                          = "Standard"
 }
 
 resource "azurerm_network_interface" "public_client_ni" {

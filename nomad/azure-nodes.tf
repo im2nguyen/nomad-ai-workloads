@@ -12,12 +12,19 @@ resource "azurerm_linux_virtual_machine" "private_client" {
   size                  = "${var.azure_client_instance_type}"
   count                 = "${var.azure_private_client_count}"
   # Depends on AWS server(s)
-  depends_on             = [aws_instance.server]
+  # depends_on             = [aws_instance.server]
 
-  source_image_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.azure_resource_group_name}/providers/Microsoft.Compute/images/${var.azure_image_name}"
+  # source_image_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.azure_resource_group_name}/providers/Microsoft.Compute/images/${var.azure_image_name}"
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts-gen2"
+    version   = "latest"
+  }
 
   os_disk {
-    name              = "${local.prefix}-private0client-osdisk-${count.index}"
+    name              = "${local.prefix}-private-client-osdisk-${count.index}"
     caching           = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }
@@ -25,7 +32,7 @@ resource "azurerm_linux_virtual_machine" "private_client" {
   computer_name  = "${local.prefix}-client-${count.index}"
   admin_username = "ubuntu"
   admin_password = random_string.vm_password.result
-  custom_data    = "${base64encode(templatefile("${path.module}/../shared/data-scripts/user-data-client.sh", {
+  custom_data    = "${base64encode(templatefile("${path.module}/../shared/data-scripts/test-data-client.sh", {
       domain                  = var.domain
       datacenter              = var.datacenter
       nomad_node_name         = "azure-client-${count.index}"
@@ -52,9 +59,16 @@ resource "azurerm_linux_virtual_machine" "public_client" {
   size                  = "${var.azure_client_instance_type}"
   count                 = "${var.azure_public_client_count}"
   # Depends on AWS server(s)
-  depends_on             = [aws_instance.server]
+  # depends_on             = [aws_instance.server]
 
-  source_image_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.azure_resource_group_name}/providers/Microsoft.Compute/images/${var.azure_image_name}"
+  # source_image_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.azure_resource_group_name}/providers/Microsoft.Compute/images/${var.azure_image_name}"
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts-gen2"
+    version   = "latest"
+  }
 
   os_disk {
     name              = "${local.prefix}-public-client-osdisk-${count.index}"
@@ -65,7 +79,7 @@ resource "azurerm_linux_virtual_machine" "public_client" {
   computer_name  = "${local.prefix}-client-${count.index}"
   admin_username = "ubuntu"
   admin_password = random_string.vm_password.result
-  custom_data    = "${base64encode(templatefile("${path.module}/../shared/data-scripts/user-data-client.sh", {
+  custom_data    = "${base64encode(templatefile("${path.module}/../shared/data-scripts/test-data-client.sh", {
       domain                  = var.domain
       datacenter              = var.datacenter
       nomad_node_name         = "azure-public-client-${count.index}"

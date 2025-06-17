@@ -15,7 +15,8 @@ resource "google_compute_instance" "private_client" {
 
   boot_disk {
     initialize_params {
-      image = var.gcp_machine_image
+      # image = var.gcp_machine_image
+      image = "ubuntu-minimal-2204-jammy-v20231213b"
       size  = var.gcp_root_block_device_size
     }
   }
@@ -35,7 +36,7 @@ resource "google_compute_instance" "private_client" {
     ]
   }
 
-  metadata_startup_script = templatefile("${path.module}/../shared/data-scripts/user-data-client.sh", {
+  metadata_startup_script = templatefile("${path.module}/../shared/data-scripts/test-data-client.sh", {
     domain                  = var.domain
     datacenter              = var.datacenter
     nomad_node_name         = "gcp-client-${count.index}"
@@ -63,7 +64,8 @@ resource "google_compute_instance" "public_client" {
 
   boot_disk {
     initialize_params {
-      image = var.gcp_machine_image
+      # image = var.gcp_machine_image
+      image = "ubuntu-minimal-2204-jammy-v20231213b"
       size  = var.gcp_root_block_device_size
     }
   }
@@ -83,7 +85,7 @@ resource "google_compute_instance" "public_client" {
     ]
   }
 
-  metadata_startup_script = templatefile("${path.module}/../shared/data-scripts/user-data-client.sh", {
+  metadata_startup_script = templatefile("${path.module}/../shared/data-scripts/test-data-client.sh", {
     domain                  = var.domain
     datacenter              = var.datacenter
     nomad_node_name         = "gcp-public-client-${count.index}"

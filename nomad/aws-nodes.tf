@@ -1,3 +1,33 @@
+data "aws_ami" "ubuntu-jammy-2204" {
+  most_recent = true
+  owners = ["099720109477"] # Canonical
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+
+  filter {
+    name   = "block-device-mapping.volume-type"
+    values = ["gp2"]
+  }
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "root-device-type"
+    values = ["ebs"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
 #-------------------------------------------------------------------------------
 # Nomad Server(s)
 #-------------------------------------------------------------------------------
@@ -7,7 +37,8 @@ resource "aws_instance" "server" {
   depends_on             = [module.vpc]
   count                  = var.aws_server_count
 
-  ami                    = var.aws_ami
+  # ami                    = var.aws_ami
+  ami                    = data.aws_ami.ubuntu-jammy-2204.id
   instance_type          = var.aws_server_instance_type
   key_name               = aws_key_pair.vm_ssh_key_pair.key_name
   associate_public_ip_address = true
@@ -32,7 +63,7 @@ resource "aws_instance" "server" {
     delete_on_termination = "true"
   }
 
-  user_data = templatefile("${path.module}/../shared/data-scripts/user-data-server.sh", {
+  user_data = templatefile("${path.module}/../shared/data-scripts/test-data-server.sh", {
     domain                  = var.domain
     datacenter              = var.datacenter
     server_count            = "${var.aws_server_count}"
@@ -75,10 +106,11 @@ resource "aws_instance" "server" {
 
 resource "aws_instance" "client" {
   
-  depends_on             = [aws_instance.server]
+  # depends_on             = [aws_instance.server]
   count                  = var.aws_private_client_count
   
-  ami                    = var.aws_ami
+  # ami                    = var.aws_ami
+  ami                    = data.aws_ami.ubuntu-jammy-2204.id
   instance_type          = var.aws_client_instance_type
   key_name               = aws_key_pair.vm_ssh_key_pair.key_name
   associate_public_ip_address = true
@@ -108,7 +140,7 @@ resource "aws_instance" "client" {
     delete_on_termination = "true"
   }
 
-  user_data = templatefile("${path.module}/../shared/data-scripts/user-data-client.sh", {
+  user_data = templatefile("${path.module}/../shared/data-scripts/test-data-client.sh", {
     domain                  = var.domain
     datacenter              = var.datacenter
     cloud_env               = "aws"
@@ -131,10 +163,11 @@ resource "aws_instance" "client" {
 
 resource "aws_instance" "public_client" {
   
-  depends_on             = [aws_instance.server]
+  # depends_on             = [aws_instance.server]
   count                  = var.aws_public_client_count
   
-  ami                    = var.aws_ami
+  # ami                    = var.aws_ami
+  ami                    = data.aws_ami.ubuntu-jammy-2204.id
   instance_type          = var.aws_client_instance_type
   key_name               = aws_key_pair.vm_ssh_key_pair.key_name
   associate_public_ip_address = true
@@ -165,7 +198,7 @@ resource "aws_instance" "public_client" {
     delete_on_termination = "true"
   }
 
-  user_data = templatefile("${path.module}/../shared/data-scripts/user-data-client.sh", {
+  user_data = templatefile("${path.module}/../shared/data-scripts/test-data-client.sh", {
     domain                  = var.domain
     datacenter              = var.datacenter
     cloud_env               = "aws"

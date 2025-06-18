@@ -9,7 +9,7 @@ aws_region                      = "AWS_REGION"
 aws_ami                         = "OUTPUT_FROM_AWS_PACKER_BUILD"
 
 # Default values:
-# aws_server_instance_type      = "t2.micro"
+# aws_server_instance_type      = "t2.medium"
 # aws_server_count              = "3"
 # aws_client_instance_type      = "t2.medium"
 # aws_private_client_count      = "1"
@@ -32,7 +32,7 @@ azure_image_name                = "OUTPUT_FROM_AZURE_PACKER_BUILD"
 # azure_resource_group_name       = "nomad-multicloud"
 
 # Default values:
-# azure_client_instance_type    = "Standard_B1s"
+# azure_client_instance_type    = "Standard_B2s"
 # azure_private_client_count    = "1"
 # azure_public_client_count     = "1"
 
@@ -47,6 +47,6 @@ gcp_zone                        = "GCP_ZONE"
 
 # Terraform variables
 gcp_machine_image               = "OUTPUT_FROM_GCP_PACKER_BUILD"
-# gcp_client_instance_type      = "e2-micro"
+# gcp_client_instance_type      = "n4-standard-2"
 # gcp_private_client_count      = "1"
 # gcp_public_client_count       = "1"

@@ -32,7 +32,7 @@ resource "azurerm_linux_virtual_machine" "private_client" {
   computer_name  = "${local.prefix}-client-${count.index}"
   admin_username = "ubuntu"
   admin_password = random_string.vm_password.result
-  custom_data    = "${base64encode(templatefile("${path.module}/../shared/data-scripts/test-data-client.sh", {
+  custom_data    = "${base64encode(templatefile("${path.module}/../shared/data-scripts/user-data-client.sh", {
       domain                  = var.domain
       datacenter              = var.datacenter
       nomad_node_name         = "azure-client-${count.index}"
@@ -79,7 +79,7 @@ resource "azurerm_linux_virtual_machine" "public_client" {
   computer_name  = "${local.prefix}-client-${count.index}"
   admin_username = "ubuntu"
   admin_password = random_string.vm_password.result
-  custom_data    = "${base64encode(templatefile("${path.module}/../shared/data-scripts/test-data-client.sh", {
+  custom_data    = "${base64encode(templatefile("${path.module}/../shared/data-scripts/user-data-client.sh", {
       domain                  = var.domain
       datacenter              = var.datacenter
       nomad_node_name         = "azure-public-client-${count.index}"

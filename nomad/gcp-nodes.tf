@@ -36,7 +36,7 @@ resource "google_compute_instance" "private_client" {
     ]
   }
 
-  metadata_startup_script = templatefile("${path.module}/../shared/data-scripts/test-data-client.sh", {
+  metadata_startup_script = templatefile("${path.module}/../shared/data-scripts/user-data-client.sh", {
     domain                  = var.domain
     datacenter              = var.datacenter
     nomad_node_name         = "gcp-client-${count.index}"
@@ -85,7 +85,7 @@ resource "google_compute_instance" "public_client" {
     ]
   }
 
-  metadata_startup_script = templatefile("${path.module}/../shared/data-scripts/test-data-client.sh", {
+  metadata_startup_script = templatefile("${path.module}/../shared/data-scripts/user-data-client.sh", {
     domain                  = var.domain
     datacenter              = var.datacenter
     nomad_node_name         = "gcp-public-client-${count.index}"

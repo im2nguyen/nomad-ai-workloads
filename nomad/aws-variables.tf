@@ -20,7 +20,7 @@ variable "aws_ami" {
 
 variable "aws_server_instance_type" {
   description = "The AWS instance type to use for servers."
-  default     = "t2.micro"
+  default     = "t2.medium"
 }
 
 variable "aws_client_instance_type" {

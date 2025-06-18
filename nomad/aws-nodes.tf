@@ -63,7 +63,7 @@ resource "aws_instance" "server" {
     delete_on_termination = "true"
   }
 
-  user_data = templatefile("${path.module}/../shared/data-scripts/test-data-server.sh", {
+  user_data = templatefile("${path.module}/../shared/data-scripts/user-data-server.sh", {
     domain                  = var.domain
     datacenter              = var.datacenter
     server_count            = "${var.aws_server_count}"
@@ -140,7 +140,7 @@ resource "aws_instance" "client" {
     delete_on_termination = "true"
   }
 
-  user_data = templatefile("${path.module}/../shared/data-scripts/test-data-client.sh", {
+  user_data = templatefile("${path.module}/../shared/data-scripts/user-data-client.sh", {
     domain                  = var.domain
     datacenter              = var.datacenter
     cloud_env               = "aws"
@@ -198,7 +198,7 @@ resource "aws_instance" "public_client" {
     delete_on_termination = "true"
   }
 
-  user_data = templatefile("${path.module}/../shared/data-scripts/test-data-client.sh", {
+  user_data = templatefile("${path.module}/../shared/data-scripts/user-data-client.sh", {
     domain                  = var.domain
     datacenter              = var.datacenter
     cloud_env               = "aws"

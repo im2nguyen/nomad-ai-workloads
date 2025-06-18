@@ -74,8 +74,6 @@ resource "aws_instance" "server" {
 #-------------------------------------------------------------------------------
 
 resource "aws_instance" "client" {
-  
-  depends_on             = [aws_instance.server]
   count                  = var.aws_private_client_count
   
   ami                    = var.aws_ami
@@ -130,8 +128,6 @@ resource "aws_instance" "client" {
 }
 
 resource "aws_instance" "public_client" {
-  
-  depends_on             = [aws_instance.server]
   count                  = var.aws_public_client_count
   
   ami                    = var.aws_ami

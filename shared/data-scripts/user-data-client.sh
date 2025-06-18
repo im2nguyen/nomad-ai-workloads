@@ -55,7 +55,9 @@ case $CLOUD in
   azure)
     echo "CLOUD_ENV: azure"
     IP_ADDRESS=$(curl -s -H Metadata:true --noproxy "*" http://169.254.169.254/metadata/instance/network/interface/0/ipv4/ipAddress/0?api-version=2021-12-13 | jq -r '.["privateIpAddress"]')
-    PUBLIC_IP_ADDRESS=$(curl -s -H Metadata:true --noproxy "*" http://169.254.169.254/metadata/instance/network/interface/0/ipv4/ipAddress/0?api-version=2021-12-13 | jq -r '.["publicIpAddress"]')
+    
+    # Standard SKU public IPs aren't in the instance metadata but rather in the loadbalancer
+    PUBLIC_IP_ADDRESS=$(curl -s -H Metadata:true --noproxy "*" http://169.254.169.254/metadata/loadbalancer?api-version=2020-10-01 | jq -r '.loadbalancer.publicIpAddresses[0].frontendIpAddress')
     ;;
   *)
     echo "CLOUD_ENV: not set"

@@ -16,7 +16,7 @@ variable "gcp_machine_image" {
 
 variable "gcp_client_instance_type" {
   description = "The compute engine instance type to use for clients."
-  default     = "e2-micro"
+  default     = "n4-standard-2"
 }
 
 variable "gcp_root_block_device_size" {

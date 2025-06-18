@@ -11,13 +11,11 @@ resource "azurerm_linux_virtual_machine" "private_client" {
   network_interface_ids = ["${element(azurerm_network_interface.private_client_ni.*.id, count.index)}"]
   size                  = "${var.azure_client_instance_type}"
   count                 = "${var.azure_private_client_count}"
-  # Depends on AWS server(s)
-  depends_on             = [aws_instance.server]
 
   source_image_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.azure_resource_group_name}/providers/Microsoft.Compute/images/${var.azure_image_name}"
 
   os_disk {
-    name              = "${local.prefix}-private0client-osdisk-${count.index}"
+    name              = "${local.prefix}-private-client-osdisk-${count.index}"
     caching           = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }
@@ -51,8 +49,6 @@ resource "azurerm_linux_virtual_machine" "public_client" {
   network_interface_ids = ["${element(azurerm_network_interface.public_client_ni.*.id, count.index)}"]
   size                  = "${var.azure_client_instance_type}"
   count                 = "${var.azure_public_client_count}"
-  # Depends on AWS server(s)
-  depends_on             = [aws_instance.server]
 
   source_image_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.azure_resource_group_name}/providers/Microsoft.Compute/images/${var.azure_image_name}"
 

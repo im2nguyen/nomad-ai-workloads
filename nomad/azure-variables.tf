@@ -19,7 +19,7 @@ variable "azure_allowlist_ip" {
 
 variable "azure_client_instance_type" {
   description = "The Azure VM type to use for clients."
-  default     = "Standard_B1s"
+  default     = "Standard_B2s"
 }
 
 variable "azure_private_client_count" {

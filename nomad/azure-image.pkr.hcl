@@ -2,7 +2,7 @@ packer {
   required_plugins {
     azure = {
       source  = "github.com/hashicorp/azure"
-      version = "~> 2.0.5"
+      version = "~> 2.3.3"
     }
   }
 }
@@ -28,6 +28,7 @@ source "azure-arm" "nomad-multicloud" {
   image_publisher = "Canonical"
   image_offer = "0001-com-ubuntu-server-jammy"
   image_sku = "22_04-lts-gen2"
+  public_ip_sku = "Standard"
 
   azure_tags = {
     dept = "education"

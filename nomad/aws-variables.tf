@@ -14,10 +14,6 @@ variable "aws_region" {
   description = "The AWS region to deploy to."
 }
 
-variable "aws_ami" {
-  description = "The AMI to use for the server and client machines. Output from the Packer build process."
-}
-
 variable "aws_server_instance_type" {
   description = "The AWS instance type to use for servers."
   default     = "t2.medium"

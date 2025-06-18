@@ -1,10 +1,5 @@
 variable "azure_location" {
   description = "The Azure region to deploy to."
-  default     = "eastus"
-}
-
-variable "azure_image_name" {
-  description = "The Azure image to use for the server and client machines. Output from the Packer build process. This is the image NAME not the ID."
 }
 
 variable "azure_resource_group_name" {

@@ -10,10 +10,6 @@ variable "gcp_zone" {
   description = "The GCP zone to deploy to."
 }
 
-variable "gcp_machine_image" {
-  description = "The compute image to use for the server and client machines. Output from the Packer build process."
-}
-
 variable "gcp_client_instance_type" {
   description = "The compute engine instance type to use for clients."
   default     = "n4-standard-2"

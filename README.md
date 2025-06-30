@@ -1,6 +1,6 @@
 # Nomad multi-cloud setup
 
-Nomad cluster setup with no additional software (Consul, Vault, etc). 
+Nomad cluster setup with no additional software (Consul, Vault, etc) and no VM image building. This setup is done completely with Terraform.
 
 ## Runbook
 
@@ -26,20 +26,9 @@ terraform apply
 ### Rename example variables file
 
 ```
-cd nomad
+cd ../nomad
 mv variables.hcl.example variables.hcl
 ```
-
-### Build machine images
-
-Run for each cloud environment: `aws`, `azure`, and `gcp`.
-
-```
-packer init (aws|azure|gcp)-image.pkr.hcl
-packer build -var-file=variables.hcl (aws|azure|gcp)-image.pkr.hcl
-```
-
-Copy the image name from the output and paste it into the appropriate field in `variables.hcl`: `aws_ami`, `azure_image_name`, and `gcp_machine_image`.
 
 ### Update `variables.hcl`
 

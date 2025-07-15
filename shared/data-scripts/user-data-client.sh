@@ -178,6 +178,7 @@ client {
   }
   meta {
     _NOMAD_AGENT_META
+    externalAddress = "_PUBLIC_IP_ADDRESS"
   }
   server_join {
     retry_join = [ "_NOMAD_RETRY_JOIN" ]

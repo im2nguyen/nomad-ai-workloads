@@ -144,7 +144,7 @@ resource "aws_instance" "client" {
     domain                  = var.domain
     datacenter              = var.datacenter
     cloud_env               = "aws"
-    node_pool               = "aws"
+    node_pool               = "default"
     retry_join              = local.retry_join_nomad
     nomad_node_name         = "aws-client-${count.index}"
     nomad_agent_meta        = "isPublic = false, cloud = \"aws\""
@@ -202,7 +202,7 @@ resource "aws_instance" "public_client" {
     domain                  = var.domain
     datacenter              = var.datacenter
     cloud_env               = "aws"
-    node_pool               = "aws"
+    node_pool               = "default"
     retry_join              = local.retry_join_nomad,
     nomad_node_name         = "aws-public-client-${count.index}"
     nomad_agent_meta        = "isPublic = true, cloud = \"aws\""

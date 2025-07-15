@@ -43,7 +43,7 @@ resource "google_compute_instance" "private_client" {
     nomad_agent_meta        = "isPublic = false, cloud = \"gcp\""
     region                  = var.gcp_region
     cloud_env               = "gce"
-    node_pool               = "gcp"
+    node_pool               = "default"
     retry_join              = local.gcp_retry_join
     ca_certificate          = base64gzip("${tls_self_signed_cert.datacenter_ca.cert_pem}")
     agent_certificate       = base64gzip("${tls_locally_signed_cert.gcp_client_cert[count.index].cert_pem}")
@@ -92,7 +92,7 @@ resource "google_compute_instance" "public_client" {
     nomad_agent_meta        = "isPublic = true, cloud = \"gcp\""
     region                  = var.gcp_region
     cloud_env               = "gce"
-    node_pool               = "gcp"
+    node_pool               = "default"
     retry_join              = local.gcp_retry_join
     ca_certificate          = base64gzip("${tls_self_signed_cert.datacenter_ca.cert_pem}")
     agent_certificate       = base64gzip("${tls_locally_signed_cert.gcp_public_client_cert[count.index].cert_pem}")

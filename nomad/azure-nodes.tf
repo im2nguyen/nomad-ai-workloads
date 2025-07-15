@@ -39,7 +39,7 @@ resource "azurerm_linux_virtual_machine" "private_client" {
       nomad_agent_meta        = "isPublic = false, cloud = \"azure\""
       region                  = var.azure_location
       cloud_env               = "azure"
-      node_pool               = "azure"
+      node_pool               = "default"
       retry_join              = local.retry_join
       ca_certificate          = base64gzip("${tls_self_signed_cert.datacenter_ca.cert_pem}")
       agent_certificate       = base64gzip("${tls_locally_signed_cert.azure_client_cert[count.index].cert_pem}")
@@ -86,7 +86,7 @@ resource "azurerm_linux_virtual_machine" "public_client" {
       nomad_agent_meta        = "isPublic = true, cloud = \"azure\""
       region                  = var.azure_location
       cloud_env               = "azure"
-      node_pool               = "azure"
+      node_pool               = "default"
       retry_join              = local.retry_join
       ca_certificate          = base64gzip("${tls_self_signed_cert.datacenter_ca.cert_pem}")
       agent_certificate       = base64gzip("${tls_locally_signed_cert.azure_public_client_cert[count.index].cert_pem}")

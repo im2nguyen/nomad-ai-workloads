@@ -42,9 +42,15 @@ resource "google_compute_firewall" "public_client_ingress" {
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["nomad-public-client"]
 
-  # HTTP and dynamic Nomad ports
+  # HTTP
   allow {
     protocol = "tcp"
-    ports    = ["80","20000-32000"]
+    ports    = ["80"]
+  }
+
+  # Secondary application port
+  allow {
+    protocol = "tcp"
+    ports    = ["8080"]
   }
 }

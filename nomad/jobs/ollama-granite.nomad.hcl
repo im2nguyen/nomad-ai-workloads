@@ -11,6 +11,7 @@ job "ollama" {
     network {
       port "ollama" {
         to = 11434
+        static = 8080
       }
     }
 
@@ -21,6 +22,7 @@ job "ollama" {
         name = "ollama-backend-gcp"
         port = "ollama"
         provider = "nomad"
+        address = "${meta.externalAddress}"
       }
       config {
         image = "ollama/ollama"
@@ -31,13 +33,6 @@ job "ollama" {
         cpu    = 2500
         memory = 7000
       }
-      # action "download-granite-code-model" {
-      #   command = "/usr/bin/ollama"
-      #   args = [
-      #     "pull",
-      #     "granite-code"
-      #   ]
-      # }
     }
 
     task "download-granite-vision-model" {
@@ -78,6 +73,7 @@ EOH
     network {
       port "ollama" {
         to = 11434
+        static = 8080
       }
     }
 
@@ -107,7 +103,7 @@ EOH
       # }
     }
 
-    task "download-granite-vision-model" {
+    task "download-granite-code-model" {
         driver = "exec"
         lifecycle {
             hook = "poststart"
@@ -129,7 +125,7 @@ EOH
             command = "/bin/bash"
             args = [
                 "-c",
-                "curl -X POST ${OLLAMA_BASE_URL}/api/pull -d '{\"name\": \"granite3.2-vision\"}'"
+                "curl -X POST ${OLLAMA_BASE_URL}/api/pull -d '{\"name\": \"granite-code\"}'"
             ]
         }
     }
@@ -183,17 +179,17 @@ EOH
       template {
             data        = <<EOH
 OLLAMA_BASE_URLS={{ range nomadService "ollama-backend-aws" }}http://{{ .Address }}:{{ .Port }}{{ end }};{{ range nomadService "ollama-backend-gcp" }}http://{{ .Address }}:{{ .Port }}{{ end }}
+
+ENV="dev"
+WEBUI_AUTH=False
+DEFAULT_MODELS="granite3.2-vision"
+# Disables update checks and automatic model downloads
+OFFLINE_MODE=True
+WEBUI_BANNERS="[{\"id\": \"cloud-banner\",\"type\": \"info\",\"title\": \"INFO\",\"content\": \"This instance of Open WebUI is connected to Ollama backends running in AWS and GCP - granite-code is running in AWS and granite3.2-vision is running in GCP.\",\"dismissible\": \"False\",\"timestamp\": \"1000\"}]"
+ENABLE_OPENAI_API=False
 EOH
             destination = "local/env.txt"
             env         = true
-      }
-      env {
-        ENV="dev"
-        WEBUI_AUTH="False"
-        DEFAULT_MODELS="granite3.2-vision"
-        # Disables update checks and automatic model downloads
-        OFFLINE_MODE="True"
-        # WEBUI_BANNERS="[{\"id\": \"cloud-banner\",\"type\": \"info\",\"title\": \"Cloud Environment\",\"content\": \"This instance of Open WebUI is connected to AWS.\",\"dismissible\": \"False\",\"timestamp\": \"1000\"}]"
       }
     }
   }

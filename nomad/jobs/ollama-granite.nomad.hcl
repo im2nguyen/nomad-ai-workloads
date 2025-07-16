@@ -179,7 +179,6 @@ EOH
       template {
             data        = <<EOH
 OLLAMA_BASE_URLS={{ range nomadService "ollama-backend-aws" }}http://{{ .Address }}:{{ .Port }}{{ end }};{{ range nomadService "ollama-backend-gcp" }}http://{{ .Address }}:{{ .Port }}{{ end }}
-
 ENV="dev"
 WEBUI_AUTH=False
 DEFAULT_MODELS="granite3.2-vision"
@@ -187,6 +186,14 @@ DEFAULT_MODELS="granite3.2-vision"
 OFFLINE_MODE=True
 WEBUI_BANNERS="[{\"id\": \"cloud-banner\",\"type\": \"info\",\"title\": \"INFO\",\"content\": \"This instance of Open WebUI is connected to Ollama backends running in AWS and GCP - granite-code is running in AWS and granite3.2-vision is running in GCP.\",\"dismissible\": \"False\",\"timestamp\": \"1000\"}]"
 ENABLE_OPENAI_API=False
+STORAGE_PROVIDER="s3"
+{{ with nomadVar "nomad/jobs/ollama" }}
+S3_ACCESS_KEY_ID="{{ .aws_access_key_id }}"
+S3_SECRET_ACCESS_KEY="{{ .aws_access_secret_key }}"
+S3_ENDPOINT_URL="https://s3.{{ .aws_default_region }}.amazonaws.com"
+S3_REGION_NAME="{{ .aws_default_region }}"
+S3_BUCKET_NAME="{{ .openwebui_bucket }}"
+{{ end }}
 EOH
             destination = "local/env.txt"
             env         = true

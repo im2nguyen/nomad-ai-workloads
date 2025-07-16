@@ -259,3 +259,29 @@ resource "nomad_acl_token" "nomad_user_token" {
   policies = ["nomad-user"]
   global   = true
 }
+
+# Add AWS credentials for Open WebUI access
+
+variable "aws_access_key" {
+  description = "The AWS access key ID."
+  sensitive   = true
+}
+
+variable "aws_secret_access_key" {
+  description = "The AWS secret access key."
+  sensitive   = true
+}
+
+variable "aws_default_region" {
+  description = "The default AWS region."
+}
+
+resource "nomad_variable" "aws_configs" {
+  path  = "nomad/jobs/ollama"
+  items = {
+    aws_access_key_id = var.aws_access_key
+    aws_access_secret_key = var.aws_secret_access_key
+    aws_default_region = var.aws_default_region
+    openwebui_bucket = aws_s3_bucket.openwebui_bucket.id
+  }
+}

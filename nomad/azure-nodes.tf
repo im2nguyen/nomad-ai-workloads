@@ -7,14 +7,10 @@ locals {
 resource "azurerm_linux_virtual_machine" "private_client" {
   name                  = "${local.prefix}-private-client-${count.index}"
   location              = "${var.azure_location}"
-  resource_group_name   = "${data.azurerm_resource_group.nomad_multicloud.name}"
+  resource_group_name   = "${azurerm_resource_group.nomad_multicloud.name}"
   network_interface_ids = ["${element(azurerm_network_interface.private_client_ni.*.id, count.index)}"]
   size                  = "${var.azure_client_instance_type}"
   count                 = "${var.azure_private_client_count}"
-  # Depends on AWS server(s)
-  # depends_on             = [aws_instance.server]
-
-  # source_image_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.azure_resource_group_name}/providers/Microsoft.Compute/images/${var.azure_image_name}"
 
   source_image_reference {
     publisher = "Canonical"
@@ -54,14 +50,10 @@ resource "azurerm_linux_virtual_machine" "private_client" {
 resource "azurerm_linux_virtual_machine" "public_client" {
   name                  = "${local.prefix}-public-client-${count.index}"
   location              = "${var.azure_location}"
-  resource_group_name   = "${data.azurerm_resource_group.nomad_multicloud.name}"
+  resource_group_name   = "${azurerm_resource_group.nomad_multicloud.name}"
   network_interface_ids = ["${element(azurerm_network_interface.public_client_ni.*.id, count.index)}"]
   size                  = "${var.azure_client_instance_type}"
   count                 = "${var.azure_public_client_count}"
-  # Depends on AWS server(s)
-  # depends_on             = [aws_instance.server]
-
-  # source_image_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.azure_resource_group_name}/providers/Microsoft.Compute/images/${var.azure_image_name}"
 
   source_image_reference {
     publisher = "Canonical"

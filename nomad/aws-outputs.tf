@@ -23,9 +23,9 @@ output "nomad_management_token" {
   sensitive = false
 }
 
-output "nomad_user_token" {
-  value = nonsensitive(nomad_acl_token.nomad_user_token.secret_id)
-}
+# output "nomad_user_token" {
+#   value = nonsensitive(nomad_acl_token.nomad_user_token.secret_id)
+# }
 
 # output "debug_aws_server_ssh" {
 #   value = "ssh -i certs/aws-key-pair.pem ubuntu@${aws_instance.server[0].public_ip}"

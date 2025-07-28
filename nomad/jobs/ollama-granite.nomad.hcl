@@ -1,69 +1,7 @@
 job "ollama" {
   type = "service"
 
-  group "ollama-gcp-group" {
-    constraint {
-        attribute = "${meta.cloud}"
-        operator  = "="
-        value     = "gcp"
-    }
-    count = 1
-    network {
-      port "ollama" {
-        to = 11434
-        static = 8080
-      }
-    }
-
-    task "ollama-task" {
-      driver = "docker"
-
-      service {
-        name = "ollama-backend-gcp"
-        port = "ollama"
-        provider = "nomad"
-        address = "${meta.externalAddress}"
-      }
-      config {
-        image = "ollama/ollama"
-        ports = ["ollama"]
-      }
-
-      resources {
-        cpu    = 2500
-        memory = 7000
-      }
-    }
-
-    task "download-granite-vision-model" {
-        driver = "exec"
-        lifecycle {
-            hook = "poststart"
-        }
-        resources {
-            cpu    = 100
-            memory = 100
-        }
-        template {
-            data        = <<EOH
-{{ range nomadService "ollama-backend-gcp" }}
-OLLAMA_BASE_URL="http://{{ .Address }}:{{ .Port }}"
-{{ end }}
-EOH
-            destination = "local/env.txt"
-            env         = true
-      }
-        config {
-            command = "/bin/bash"
-            args = [
-                "-c",
-                "curl -X POST ${OLLAMA_BASE_URL}/api/pull -d '{\"name\": \"granite3.2-vision\"}'"
-            ]
-        }
-    }
-
-  }
-  group "ollama-aws-group" {
+  group "ollama-group" {
     constraint {
         attribute = "${meta.cloud}"
         operator  = "="
@@ -81,7 +19,7 @@ EOH
       driver = "docker"
 
       service {
-        name = "ollama-backend-aws"
+        name = "ollama-backend"
         port = "ollama"
         provider = "nomad"
       }
@@ -116,7 +54,7 @@ EOH
         }
         template {
             data        = <<EOH
-{{ range nomadService "ollama-backend-aws" }}
+{{ range nomadService "ollama-backend" }}
 OLLAMA_BASE_URL="http://{{ .Address }}:{{ .Port }}"
 {{ end }}
 EOH
@@ -180,12 +118,11 @@ EOH
       }
       template {
             data        = <<EOH
-OLLAMA_BASE_URLS={{ range nomadService "ollama-backend-aws" }}http://{{ .Address }}:{{ .Port }}{{ end }};{{ range nomadService "ollama-backend-gcp" }}http://{{ .Address }}:{{ .Port }}{{ end }}
+OLLAMA_BASE_URL={{ range nomadService "ollama-backend" }}http://{{ .Address }}:{{ .Port }}{{ end }}
 ENV="dev"
 DEFAULT_MODELS="granite3.2-vision"
 OFFLINE_MODE="True"
 ENABLE_SIGNUP="False"
-WEBUI_BANNERS="[{\"id\": \"cloud-banner\",\"type\": \"info\",\"title\": \"INFO\",\"content\": \"This instance of Open WebUI is connected to Ollama backends running in AWS and GCP - granite-code is running in AWS and granite3.2-vision is running in GCP.\",\"dismissible\": \"False\",\"timestamp\": \"1000\"}]"
 ENABLE_OPENAI_API="False"
 STORAGE_PROVIDER="s3"
 {{ with nomadVar "nomad/jobs/ollama" }}

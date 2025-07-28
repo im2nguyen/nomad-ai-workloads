@@ -9,30 +9,3 @@ aws_region                      = "AWS_REGION"
 # aws_client_instance_type      = "t2.medium"
 # aws_private_client_count      = "1"
 # aws_public_client_count       = "1"
-
-# -----------------------------------
-# AZURE VARIABLES
-# -----------------------------------
-
-azure_location                  = "AZURE_LOCATION"
-
-# azure_resource_group_name must match the value for name_prefix
-# in /nomad/variables.tf and in /azure-dependencies/az-resource-group.tf
-# azure_resource_group_name       = "nomad-multicloud"
-
-# Default values:
-# azure_client_instance_type    = "Standard_B2s"
-# azure_private_client_count    = "1"
-# azure_public_client_count     = "1"
-
-# -----------------------------------
-# GCP VARIABLES
-# -----------------------------------
-
-gcp_project                     = "GCP_PROJECT_ID"
-gcp_region                      = "GCP_REGION"
-gcp_zone                        = "GCP_ZONE"
-
-# gcp_client_instance_type      = "n4-standard-2"
-# gcp_private_client_count      = "1"
-# gcp_public_client_count       = "1"

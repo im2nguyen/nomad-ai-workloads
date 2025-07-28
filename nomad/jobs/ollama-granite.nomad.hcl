@@ -94,11 +94,13 @@ EOH
         cpu    = 2500
         memory = 7000
       }
-      # action "download-granite-code-model" {
+      # Action to load model from
+      # https://ollama.com/library
+      # action "download-ollama-library-model" {
       #   command = "/usr/bin/ollama"
       #   args = [
       #     "pull",
-      #     "granite-code"
+      #     "OLLAMA_LIBRARY_MODEL_NAME"
       #   ]
       # }
     }
@@ -180,12 +182,11 @@ EOH
             data        = <<EOH
 OLLAMA_BASE_URLS={{ range nomadService "ollama-backend-aws" }}http://{{ .Address }}:{{ .Port }}{{ end }};{{ range nomadService "ollama-backend-gcp" }}http://{{ .Address }}:{{ .Port }}{{ end }}
 ENV="dev"
-WEBUI_AUTH=False
 DEFAULT_MODELS="granite3.2-vision"
-# Disables update checks and automatic model downloads
-OFFLINE_MODE=True
+OFFLINE_MODE="True"
+ENABLE_SIGNUP="False"
 WEBUI_BANNERS="[{\"id\": \"cloud-banner\",\"type\": \"info\",\"title\": \"INFO\",\"content\": \"This instance of Open WebUI is connected to Ollama backends running in AWS and GCP - granite-code is running in AWS and granite3.2-vision is running in GCP.\",\"dismissible\": \"False\",\"timestamp\": \"1000\"}]"
-ENABLE_OPENAI_API=False
+ENABLE_OPENAI_API="False"
 STORAGE_PROVIDER="s3"
 {{ with nomadVar "nomad/jobs/ollama" }}
 S3_ACCESS_KEY_ID="{{ .aws_access_key_id }}"
@@ -197,6 +198,22 @@ S3_BUCKET_NAME="{{ .openwebui_bucket }}"
 EOH
             destination = "local/env.txt"
             env         = true
+      }
+      template {
+            data        = <<EOH
+INSERT INTO user (id,name,email,role,profile_image_url,last_active_at,updated_at,created_at) VALUES('');
+
+INSERT INTO auth (id,email,password,active) VALUES ('');
+EOH
+            destination = "local/create-admin-user.sql"
+            env         = false
+      }
+      action "create-admin-user" {
+        command = "/bin/bash"
+        args = [
+          "-c",
+          "apt-get update && apt-get install -y sqlite3 && echo 'Running SQL insert commands...' && sqlite3 /app/backend/data/webui.db < /local/create-admin-user.sql && echo 'Finished running SQL commands'"
+        ]
       }
     }
   }

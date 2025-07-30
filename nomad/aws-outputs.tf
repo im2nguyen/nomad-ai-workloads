@@ -1,18 +1,3 @@
-# Exports all needed environment variables to connect to Nomad 
-# datacenter using CLI commands
-resource "local_file" "environment_variables" {
-  filename = "datacenter.env"
-  content = <<-EOT
-    export NOMAD_ADDR="https://${aws_instance.server[0].public_ip}:4646"
-    export NOMAD_TOKEN="${random_uuid.nomad_mgmt_token.result}"
-    export NOMAD_CACERT="${path.cwd}/certs/datacenter_ca.cert"
-    export NOMAD_TLS_SERVER_NAME="nomad.${var.datacenter}.${var.domain}"
-  EOT
-}
-
-output "configure_local_environment" {
-  value = "source ./datacenter.env"
-}
 
 output "nomad_UI" {
   value = "https://${aws_instance.server[0].public_ip}:4646"

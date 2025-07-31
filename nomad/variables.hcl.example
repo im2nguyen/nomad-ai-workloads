@@ -4,6 +4,7 @@
 
 aws_region                      = "AWS_REGION"
 
+# Default values
 # aws_server_instance_type      = "t2.medium"
 # aws_server_count              = "3"
 # aws_client_instance_type      = "t2.medium"

@@ -32,17 +32,34 @@ job "ollama" {
         cpu    = 2500
         memory = 7000
       }
-      # Action to load model from
-      # https://ollama.com/library
-      # action "download-ollama-library-model" {
-      #   command = "/usr/bin/ollama"
-      #   args = [
-      #     "pull",
-      #     "OLLAMA_LIBRARY_MODEL_NAME"
-      #   ]
-      # }
     }
 
+    task "download-granite-vision-model" {
+        driver = "exec"
+        lifecycle {
+            hook = "poststart"
+        }
+        resources {
+            cpu    = 100
+            memory = 100
+        }
+        template {
+            data        = <<EOH
+{{ range nomadService "ollama-backend" }}
+OLLAMA_BASE_URL="http://{{ .Address }}:{{ .Port }}"
+{{ end }}
+EOH
+            destination = "local/env.txt"
+            env         = true
+      }
+        config {
+            command = "/bin/bash"
+            args = [
+                "-c",
+                "curl -X POST ${OLLAMA_BASE_URL}/api/pull -d '{\"name\": \"granite3.2-vision\"}'"
+            ]
+        }
+    }
     task "download-granite-code-model" {
         driver = "exec"
         lifecycle {

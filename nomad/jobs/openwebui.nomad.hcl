@@ -54,7 +54,7 @@ OFFLINE_MODE="True"
 ENABLE_SIGNUP="False"
 ENABLE_OPENAI_API="False"
 STORAGE_PROVIDER="s3"
-{{ with nomadVar "nomad/jobs/ollama" }}
+{{ with nomadVar "nomad/jobs/open-webui" }}
 S3_ACCESS_KEY_ID="{{ .aws_access_key_id }}"
 S3_SECRET_ACCESS_KEY="{{ .aws_access_secret_key }}"
 S3_ENDPOINT_URL="https://s3.{{ .aws_default_region }}.amazonaws.com"

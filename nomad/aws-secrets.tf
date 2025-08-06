@@ -277,7 +277,7 @@ variable "aws_default_region" {
 }
 
 resource "nomad_variable" "aws_configs" {
-  path  = "nomad/jobs/ollama"
+  path  = "nomad/jobs/open-webui"
   items = {
     aws_access_key_id = var.aws_access_key
     aws_access_secret_key = var.aws_secret_access_key

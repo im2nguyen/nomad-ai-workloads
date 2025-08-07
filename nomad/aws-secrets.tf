@@ -120,17 +120,20 @@ resource "tls_locally_signed_cert" "server_cert" {
   ]
 }
 
-# Client Keys
-resource "tls_private_key" "client_key" {
-  count       = "${var.aws_private_client_count}"
+#-------------------------------------------------------------------------------
+# Client certificates for Nomad agents
+#-------------------------------------------------------------------------------
+
+# Small private client cert configs
+resource "tls_private_key" "small_private_client_key" {
+  count       = "${var.aws_small_private_client_count}"
   algorithm   = "ECDSA"
   ecdsa_curve = "P384"
 }
 
-# Client CSR
-resource "tls_cert_request" "client_csr" {
-  count = "${var.aws_private_client_count}"
-  private_key_pem = "${element(tls_private_key.client_key.*.private_key_pem, count.index)}"
+resource "tls_cert_request" "small_private_client_csr" {
+  count = "${var.aws_small_private_client_count}"
+  private_key_pem = "${element(tls_private_key.small_private_client_key.*.private_key_pem, count.index)}"
 
   subject {
     country = "US"
@@ -154,10 +157,9 @@ resource "tls_cert_request" "client_csr" {
   ]
 }
 
-# Client Certs
-resource "tls_locally_signed_cert" "client_cert" {
-  count = "${var.aws_private_client_count}"
-  cert_request_pem = "${element(tls_cert_request.client_csr.*.cert_request_pem, count.index)}"
+resource "tls_locally_signed_cert" "small_private_client_cert" {
+  count = "${var.aws_small_private_client_count}"
+  cert_request_pem = "${element(tls_cert_request.small_private_client_csr.*.cert_request_pem, count.index)}"
 
   ca_private_key_pem = "${tls_private_key.datacenter_ca.private_key_pem}"
   ca_cert_pem = "${tls_self_signed_cert.datacenter_ca.cert_pem}"
@@ -172,17 +174,16 @@ resource "tls_locally_signed_cert" "client_cert" {
   ]
 }
 
-# Public Client Keys
-resource "tls_private_key" "public_client_key" {
-  count       = "${var.aws_public_client_count}"
+# Small public client cert configs
+resource "tls_private_key" "small_public_client_key" {
+  count       = "${var.aws_small_public_client_count}"
   algorithm   = "ECDSA"
   ecdsa_curve = "P384"
 }
 
-# Public Client CSR
-resource "tls_cert_request" "public_client_csr" {
-  count = "${var.aws_public_client_count}"
-  private_key_pem = "${element(tls_private_key.public_client_key.*.private_key_pem, count.index)}"
+resource "tls_cert_request" "small_public_client_csr" {
+  count = "${var.aws_small_public_client_count}"
+  private_key_pem = "${element(tls_private_key.small_public_client_key.*.private_key_pem, count.index)}"
 
   subject {
     country = "US"
@@ -195,8 +196,8 @@ resource "tls_cert_request" "public_client_csr" {
 
   dns_names = [
     "client.${var.datacenter}.${var.domain}",
-    "public-client-${count.index}.${var.datacenter}.${var.domain}",
-    "public-nomad-client-${count.index}.${var.datacenter}.${var.domain}",
+    "client-${count.index}.${var.datacenter}.${var.domain}",
+    "nomad-client-${count.index}.${var.datacenter}.${var.domain}",
     "client.global.nomad",
     "localhost"
   ]
@@ -206,10 +207,209 @@ resource "tls_cert_request" "public_client_csr" {
   ]
 }
 
-# Public Client Certs
-resource "tls_locally_signed_cert" "public_client_cert" {
-  count = "${var.aws_public_client_count}"
-  cert_request_pem = "${element(tls_cert_request.public_client_csr.*.cert_request_pem, count.index)}"
+resource "tls_locally_signed_cert" "small_public_client_cert" {
+  count = "${var.aws_small_public_client_count}"
+  cert_request_pem = "${element(tls_cert_request.small_public_client_csr.*.cert_request_pem, count.index)}"
+
+  ca_private_key_pem = "${tls_private_key.datacenter_ca.private_key_pem}"
+  ca_cert_pem = "${tls_self_signed_cert.datacenter_ca.cert_pem}"
+
+  validity_period_hours = 87600 # 10 years
+
+  allowed_uses = [
+    "digital_signature",
+    "key_encipherment",
+    "server_auth",
+    "client_auth"
+  ]
+}
+
+# Medium private client cert configs
+resource "tls_private_key" "medium_private_client_key" {
+  count       = "${var.aws_medium_private_client_count}"
+  algorithm   = "ECDSA"
+  ecdsa_curve = "P384"
+}
+
+resource "tls_cert_request" "medium_private_client_csr" {
+  count = "${var.aws_medium_private_client_count}"
+  private_key_pem = "${element(tls_private_key.medium_private_client_key.*.private_key_pem, count.index)}"
+
+  subject {
+    country = "US"
+    province = "CA"
+    locality = "San Francisco/street=101 Second Street/postalCode=9410"
+    organization = "HashiCorp Inc."
+    organizational_unit = "Runtime"
+    common_name  = "client-${count.index}.${var.datacenter}.${var.domain}"
+  }
+
+  dns_names = [
+    "client.${var.datacenter}.${var.domain}",
+    "client-${count.index}.${var.datacenter}.${var.domain}",
+    "nomad-client-${count.index}.${var.datacenter}.${var.domain}",
+    "client.global.nomad",
+    "localhost"
+  ]
+
+  ip_addresses = [
+    "127.0.0.1"
+  ]
+}
+
+resource "tls_locally_signed_cert" "medium_private_client_cert" {
+  count = "${var.aws_medium_private_client_count}"
+  cert_request_pem = "${element(tls_cert_request.medium_private_client_csr.*.cert_request_pem, count.index)}"
+
+  ca_private_key_pem = "${tls_private_key.datacenter_ca.private_key_pem}"
+  ca_cert_pem = "${tls_self_signed_cert.datacenter_ca.cert_pem}"
+
+  validity_period_hours = 87600 # 10 years
+
+  allowed_uses = [
+    "digital_signature",
+    "key_encipherment",
+    "server_auth",
+    "client_auth"
+  ]
+}
+
+# Medium public client cert configs
+resource "tls_private_key" "medium_public_client_key" {
+  count       = "${var.aws_medium_public_client_count}"
+  algorithm   = "ECDSA"
+  ecdsa_curve = "P384"
+}
+
+resource "tls_cert_request" "medium_public_client_csr" {
+  count = "${var.aws_medium_public_client_count}"
+  private_key_pem = "${element(tls_private_key.medium_public_client_key.*.private_key_pem, count.index)}"
+
+  subject {
+    country = "US"
+    province = "CA"
+    locality = "San Francisco/street=101 Second Street/postalCode=9410"
+    organization = "HashiCorp Inc."
+    organizational_unit = "Runtime"
+    common_name  = "client-${count.index}.${var.datacenter}.${var.domain}"
+  }
+
+  dns_names = [
+    "client.${var.datacenter}.${var.domain}",
+    "client-${count.index}.${var.datacenter}.${var.domain}",
+    "nomad-client-${count.index}.${var.datacenter}.${var.domain}",
+    "client.global.nomad",
+    "localhost"
+  ]
+
+  ip_addresses = [
+    "127.0.0.1"
+  ]
+}
+
+resource "tls_locally_signed_cert" "medium_public_client_cert" {
+  count = "${var.aws_medium_public_client_count}"
+  cert_request_pem = "${element(tls_cert_request.medium_public_client_csr.*.cert_request_pem, count.index)}"
+
+  ca_private_key_pem = "${tls_private_key.datacenter_ca.private_key_pem}"
+  ca_cert_pem = "${tls_self_signed_cert.datacenter_ca.cert_pem}"
+
+  validity_period_hours = 87600 # 10 years
+
+  allowed_uses = [
+    "digital_signature",
+    "key_encipherment",
+    "server_auth",
+    "client_auth"
+  ]
+}
+
+# Large private client cert configs
+resource "tls_private_key" "large_private_client_key" {
+  count       = "${var.aws_large_private_client_count}"
+  algorithm   = "ECDSA"
+  ecdsa_curve = "P384"
+}
+
+resource "tls_cert_request" "large_private_client_csr" {
+  count = "${var.aws_large_private_client_count}"
+  private_key_pem = "${element(tls_private_key.large_private_client_key.*.private_key_pem, count.index)}"
+
+  subject {
+    country = "US"
+    province = "CA"
+    locality = "San Francisco/street=101 Second Street/postalCode=9410"
+    organization = "HashiCorp Inc."
+    organizational_unit = "Runtime"
+    common_name  = "client-${count.index}.${var.datacenter}.${var.domain}"
+  }
+
+  dns_names = [
+    "client.${var.datacenter}.${var.domain}",
+    "client-${count.index}.${var.datacenter}.${var.domain}",
+    "nomad-client-${count.index}.${var.datacenter}.${var.domain}",
+    "client.global.nomad",
+    "localhost"
+  ]
+
+  ip_addresses = [
+    "127.0.0.1"
+  ]
+}
+
+resource "tls_locally_signed_cert" "large_private_client_cert" {
+  count = "${var.aws_large_private_client_count}"
+  cert_request_pem = "${element(tls_cert_request.large_private_client_csr.*.cert_request_pem, count.index)}"
+
+  ca_private_key_pem = "${tls_private_key.datacenter_ca.private_key_pem}"
+  ca_cert_pem = "${tls_self_signed_cert.datacenter_ca.cert_pem}"
+
+  validity_period_hours = 87600 # 10 years
+
+  allowed_uses = [
+    "digital_signature",
+    "key_encipherment",
+    "server_auth",
+    "client_auth"
+  ]
+}
+
+# Large public client cert configs
+resource "tls_private_key" "large_public_client_key" {
+  count       = "${var.aws_large_public_client_count}"
+  algorithm   = "ECDSA"
+  ecdsa_curve = "P384"
+}
+
+resource "tls_cert_request" "large_public_client_csr" {
+  count = "${var.aws_large_public_client_count}"
+  private_key_pem = "${element(tls_private_key.large_public_client_key.*.private_key_pem, count.index)}"
+
+  subject {
+    country = "US"
+    province = "CA"
+    locality = "San Francisco/street=101 Second Street/postalCode=9410"
+    organization = "HashiCorp Inc."
+    organizational_unit = "Runtime"
+    common_name  = "client-${count.index}.${var.datacenter}.${var.domain}"
+  }
+
+  dns_names = [
+    "client.${var.datacenter}.${var.domain}",
+    "client-${count.index}.${var.datacenter}.${var.domain}",
+    "nomad-client-${count.index}.${var.datacenter}.${var.domain}",
+    "client.global.nomad",
+    "localhost"
+  ]
+
+  ip_addresses = [
+    "127.0.0.1"
+  ]
+}
+
+resource "tls_locally_signed_cert" "large_public_client_cert" {
+  count = "${var.aws_large_public_client_count}"
+  cert_request_pem = "${element(tls_cert_request.large_public_client_csr.*.cert_request_pem, count.index)}"
 
   ca_private_key_pem = "${tls_private_key.datacenter_ca.private_key_pem}"
   ca_cert_pem = "${tls_self_signed_cert.datacenter_ca.cert_pem}"

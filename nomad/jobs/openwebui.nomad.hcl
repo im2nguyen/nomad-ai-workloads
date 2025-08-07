@@ -1,12 +1,8 @@
 job "open-webui" {
   type = "service"
+  node_pool = "small"
 
   group "open-webui" {
-    constraint {
-        attribute = "${meta.cloud}"
-        operator  = "="
-        value     = "aws"
-    }
     constraint {
         attribute = "${meta.isPublic}"
         operator  = "="

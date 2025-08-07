@@ -1,12 +1,8 @@
 job "ollama" {
   type = "service"
+  node_pool = "large"
 
   group "ollama" {
-    constraint {
-        attribute = "${meta.cloud}"
-        operator  = "="
-        value     = "aws"
-    }
     count = 1
     network {
       port "ollama" {

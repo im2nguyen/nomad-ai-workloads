@@ -173,6 +173,7 @@ resource "aws_instance" "small_public_client" {
   associate_public_ip_address = true
   vpc_security_group_ids = [
     aws_security_group.ssh_ingress.id,
+    aws_security_group.public_client_ingress.id,
     aws_security_group.allow_all_internal.id
   ]
   subnet_id = module.vpc.public_subnets[0]
@@ -287,6 +288,7 @@ resource "aws_instance" "medium_public_client" {
   associate_public_ip_address = true
   vpc_security_group_ids = [
     aws_security_group.ssh_ingress.id,
+    aws_security_group.public_client_ingress.id,
     aws_security_group.allow_all_internal.id
   ]
   subnet_id = module.vpc.public_subnets[0]
@@ -401,6 +403,7 @@ resource "aws_instance" "large_public_client" {
   associate_public_ip_address = true
   vpc_security_group_ids = [
     aws_security_group.ssh_ingress.id,
+    aws_security_group.public_client_ingress.id,
     aws_security_group.allow_all_internal.id
   ]
   subnet_id = module.vpc.public_subnets[0]

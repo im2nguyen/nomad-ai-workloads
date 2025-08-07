@@ -38,8 +38,8 @@ job "open-webui" {
         ports = ["open-webui"]
       }
       resources {
-        cpu    = 1000
-        memory = 2000
+        cpu    = 2000
+        memory = 2500
       }
       template {
             data        = <<EOH

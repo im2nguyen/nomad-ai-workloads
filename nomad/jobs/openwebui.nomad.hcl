@@ -45,7 +45,7 @@ job "open-webui" {
             data        = <<EOH
 OLLAMA_BASE_URL={{ range nomadService "ollama-backend" }}http://{{ .Address }}:{{ .Port }}{{ end }}
 ENV="dev"
-DEFAULT_MODELS="granite3.2-vision"
+DEFAULT_MODELS="granite-3.3"
 OFFLINE_MODE="True"
 ENABLE_SIGNUP="False"
 ENABLE_OPENAI_API="False"

@@ -25,12 +25,12 @@ job "ollama" {
       }
 
       resources {
-        cpu    = 2500
-        memory = 7000
+        cpu    = 9100
+        memory = 15000
       }
     }
 
-    task "download-granite-vision-model" {
+    task "download-granite3.3-model" {
         driver = "exec"
         lifecycle {
             hook = "poststart"
@@ -52,33 +52,7 @@ EOH
             command = "/bin/bash"
             args = [
                 "-c",
-                "curl -X POST ${OLLAMA_BASE_URL}/api/pull -d '{\"name\": \"granite3.2-vision\"}'"
-            ]
-        }
-    }
-    task "download-granite-code-model" {
-        driver = "exec"
-        lifecycle {
-            hook = "poststart"
-        }
-        resources {
-            cpu    = 100
-            memory = 100
-        }
-        template {
-            data        = <<EOH
-{{ range nomadService "ollama-backend" }}
-OLLAMA_BASE_URL="http://{{ .Address }}:{{ .Port }}"
-{{ end }}
-EOH
-            destination = "local/env.txt"
-            env         = true
-      }
-        config {
-            command = "/bin/bash"
-            args = [
-                "-c",
-                "curl -X POST ${OLLAMA_BASE_URL}/api/pull -d '{\"name\": \"granite-code\"}'"
+                "curl -X POST ${OLLAMA_BASE_URL}/api/pull -d '{\"name\": \"granite3.3:2b\"}'"
             ]
         }
     }

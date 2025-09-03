@@ -17,7 +17,7 @@ variable "public" {
   type        = bool
 }
 
-variable "count" {
+variable "instance_count" {
   description = "Number of client instances to create"
   type        = number
   default     = 1

@@ -5,7 +5,7 @@
 locals {
   # Create individual instance configurations
   client_instances = [
-    for i in range(var.count) : {
+    for i in range(var.instance_count) : {
       index              = i
       nomad_node_name    = "aws-${var.size}-${var.public ? "public" : "private"}-client-${i}"
       nomad_agent_meta   = "isPublic = ${var.public}, cloud = \"aws\""
@@ -27,14 +27,14 @@ locals {
 
 # Client private keys
 resource "tls_private_key" "client_key" {
-  count       = var.count
+  count       = var.instance_count
   algorithm   = "ECDSA"
   ecdsa_curve = "P384"
 }
 
 # Client certificate signing requests
 resource "tls_cert_request" "client_csr" {
-  count = var.count
+  count = var.instance_count
   private_key_pem = tls_private_key.client_key[count.index].private_key_pem
 
   subject {
@@ -61,7 +61,7 @@ resource "tls_cert_request" "client_csr" {
 
 # Client certificates
 resource "tls_locally_signed_cert" "client_cert" {
-  count = var.count
+  count = var.instance_count
   cert_request_pem = tls_cert_request.client_csr[count.index].cert_request_pem
 
   ca_private_key_pem = var.ca_private_key
@@ -82,7 +82,7 @@ resource "tls_locally_signed_cert" "client_cert" {
 #-------------------------------------------------------------------------------
 
 resource "aws_instance" "nomad_clients" {
-  count = var.count
+  count = var.instance_count
   
   ami                    = var.ami_id
   instance_type          = var.instance_type

@@ -38,7 +38,7 @@ output "public" {
 
 output "count" {
   description = "Number of instances created"
-  value       = var.count
+  value       = var.instance_count
 }
 
 #-------------------------------------------------------------------------------
@@ -55,7 +55,7 @@ output "instance_summary" {
   value = {
     size   = var.size
     public = var.public
-    count  = var.count
+    count  = var.instance_count
     instances = [
       for i, instance in aws_instance.nomad_clients : {
         id         = instance.id

@@ -23,7 +23,7 @@ variable "instance_count" {
   default     = 1
   
   validation {
-    condition     = var.count > 0
+    condition     = var.instance_count > 0
     error_message = "Count must be greater than 0."
   }
 }

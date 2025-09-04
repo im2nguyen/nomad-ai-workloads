@@ -90,8 +90,6 @@ module "nomad_client_medium_private" {
 
   instance_type = var.aws_medium_instance_type
 
-
-
   # Infrastructure references
   vpc_id                = module.vpc.vpc_id
   public_subnet_ids     = module.vpc.public_subnets

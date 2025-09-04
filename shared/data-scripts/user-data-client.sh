@@ -144,6 +144,18 @@ curl -L -o cni-plugins.tgz "https://github.com/containernetworking/plugins/relea
 
 rm -f $NOMAD_CONFIG_DIR/nomad.hcl
 
+# ---- Open WebUI SQLite persistence (host volume) ----
+# Create a durable directory on the client for Open WebUI data
+sudo mkdir -p /var/lib/nomad/openwebui
+# Nomad agent reads the host volume path; allow nomad user access
+sudo chown -R nomad:nomad /var/lib/nomad/openwebui
+sudo chmod 0755 /var/lib/nomad/openwebui
+
+# Inject a host_volume definition into the client config.
+sudo mv /etc/nomad.d/nomad.hcl.tmp /etc/nomad.d/nomad.hcl
+sudo chown nomad:nomad /etc/nomad.d/nomad.hcl
+sudo chmod 0644 /etc/nomad.d/nomad.hcl
+
 # set -x 
 
 # Create nomad agent config file
@@ -184,6 +196,11 @@ client {
     retry_join = [ "_NOMAD_RETRY_JOIN" ]
   }
   node_pool = "_NODE_POOL"
+
+  host_volume "openwebui-data" {
+    path      = "/var/lib/nomad/openwebui"
+    read_only = false
+  }
 }
 
 # -----------------------------+

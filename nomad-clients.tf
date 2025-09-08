@@ -1,6 +1,7 @@
 # Small Private Clients
 module "nomad_client_small_private" {
   source = "./modules/nomad-client"
+  depends_on = [aws_instance.server]
 
   size   = "small"
   public = false
@@ -42,6 +43,7 @@ module "nomad_client_small_private" {
 # Small Public Clients
 module "nomad_client_small_public" {
   source = "./modules/nomad-client"
+  depends_on = [aws_instance.server]
 
   size   = "small"
   public = true
@@ -83,6 +85,7 @@ module "nomad_client_small_public" {
 # Medium Private Clients
 module "nomad_client_medium_private" {
   source = "./modules/nomad-client"
+  depends_on = [aws_instance.server]
 
   size   = "medium"
   public = false
@@ -123,6 +126,7 @@ module "nomad_client_medium_private" {
 # Medium Public Clients
 module "nomad_client_medium_public" {
   source = "./modules/nomad-client"
+  depends_on = [aws_instance.server]
 
   size   = "medium"
   public = true
@@ -165,6 +169,7 @@ module "nomad_client_medium_public" {
 # Large Private Clients
 module "nomad_client_large_private" {
   source = "./modules/nomad-client"
+  depends_on = [aws_instance.server]
 
   size   = "large"
   public = false
@@ -207,7 +212,8 @@ module "nomad_client_large_private" {
 # Large Public Clients
 module "nomad_client_large_public" {
   source = "./modules/nomad-client"
-
+  depends_on = [aws_instance.server]
+  
   size   = "large"
   public = true
   count  = var.aws_large_public_client_count

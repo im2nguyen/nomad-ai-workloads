@@ -1,0 +1,21 @@
+# -----------------------------------
+# AWS VARIABLES
+# -----------------------------------
+
+aws_region                      = "AWS_REGION"
+
+# Default values
+# aws_server_instance_type          = "t2.medium"
+# aws_server_count                  = "1"
+
+# aws_small_instance_type           = "t2.medium"
+# aws_small_private_client_count    = "1"
+# aws_small_public_client_count     = "1"
+
+# aws_medium_instance_type          = "t2.large"
+# aws_medium_private_client_count   = "1"
+# aws_medium_public_client_count    = "1"
+
+# aws_large_instance_type           = "t2.xlarge"
+# aws_large_private_client_count    = "1"
+# aws_large_public_client_count     = "1"

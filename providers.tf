@@ -21,29 +21,11 @@ terraform {
       source = "hashicorp/nomad"
       version = "2.3.1"
     }
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "=3.0.0"
-    }
-    google = {
-      source  = "hashicorp/google"
-      version = "~> 6.37.0"
-    }
   }
 }
 
 provider "aws" {
   region = var.aws_region
-}
-
-provider "azurerm" {
-  features {}
-}
-
-provider "google" {
-  project = var.gcp_project
-  region  = var.gcp_region
-  zone    = var.gcp_zone
 }
 
 provider "nomad" {

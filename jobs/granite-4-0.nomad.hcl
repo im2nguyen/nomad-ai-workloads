@@ -52,10 +52,7 @@ EOH
             command = "/bin/bash"
             args = [
                 "-c",
-                # hf.co/bartowski/ibm-granite_granite-4.0-tiny-preview-GGUF:Q4_K_M
-                # is an ollama compatible model to
-                # hf.co/ibm-granite/granite-4.0-tiny-preview 
-                "curl -X POST ${OLLAMA_BASE_URL}/api/pull -d '{\"name\": \"hf.co/bartowski/ibm-granite_granite-4.0-tiny-preview-GGUF:Q4_K_M\"}'"
+                "curl -X POST ${OLLAMA_BASE_URL}/api/pull -d '{\"name\": \"hf.co/ibm-granite/granite-4.0-tiny-preview-GGUF:Q4_K_M\"}'"
             ]
         }
     }

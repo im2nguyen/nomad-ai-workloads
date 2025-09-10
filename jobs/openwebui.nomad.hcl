@@ -8,6 +8,13 @@ job "open-webui" {
         operator  = "="
         value     = "true"
     }
+
+    volume "openwebui-data" {
+      type      = "host"
+      source    = "openwebui-data"
+      read_only = false
+    }
+
     count = 1
     network {
       port "open-webui" {

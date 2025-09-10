@@ -33,6 +33,12 @@ job "open-webui" {
         }
       }
 
+      volume_mount {
+        volume      = "openwebui-data"
+        destination = "/app/backend/data"
+        read_only   = false
+      }
+
       config {
         image = "ghcr.io/open-webui/open-webui:main"
         ports = ["open-webui"]
@@ -43,7 +49,7 @@ job "open-webui" {
       }
       template {
             data        = <<EOH
-OLLAMA_BASE_URL={{ range nomadService "ollama-backend" }}http://{{ .Address }}:{{ .Port }}{{ end }}
+OLLAMA_BASE_URLS={{ range nomadService "ollama-backend" -}}http://{{ .Address }}:{{ .Port }};{{- end }}
 ENV="dev"
 DEFAULT_MODELS="granite-3.3"
 OFFLINE_MODE="True"
